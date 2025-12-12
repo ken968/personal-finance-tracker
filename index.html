@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Personal Finance Tracker - Aplikasi pencatat keuangan pribadi untuk mengelola pemasukan dan pengeluaran Anda">
+    <meta name="keywords" content="keuangan, finance tracker, pencatat keuangan, budget, pemasukan, pengeluaran">
+    <title>Personal Finance Tracker - Kelola Keuangan Anda</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>Memuat data...</p>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>Personal Finance Tracker</h1>
+            <p class="subtitle">Darmawan Kenzo Ozora</p>
+        </header>
+
+         <!-- Dashboard Summary Section -->
+        <section class="card dashboard-section">
+            <h2>📊 Dashboard Keuangan</h2>
+            
+            <div class="summary-cards">
+                <div class="summary-card balance-card">
+                    <div class="summary-icon">💵</div>
+                    <div class="summary-content">
+                        <p class="summary-label">Saldo Akhir</p>
+                        <p class="summary-value" id="finalBalance">Rp 0</p>
+                    </div>
+                </div>
+
+                <div class="summary-card income-card">
+                    <div class="summary-icon">📈</div>
+                    <div class="summary-content">
+                        <p class="summary-label">Total Pemasukan</p>
+                        <p class="summary-value income" id="totalIncome">Rp 0</p>
+                    </div>
+                </div>
+
+                <div class="summary-card expense-card">
+                    <div class="summary-icon">📉</div>
+                    <div class="summary-content">
+                        <p class="summary-label">Total Pengeluaran</p>
+                        <p class="summary-value expense" id="totalExpense">Rp 0</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Initial Balance Setup Section -->
+        <section class="card initial-balance-section">
+            <h2>⚙️ Setup Saldo Awal</h2>
+            <p class="section-description">Masukkan total uang Anda saat ini (Cash + Bank + Dompet Digital)</p>
+            <form id="initialBalanceForm" class="form">
+                <div class="form-group">
+                    <label for="initialBalanceInput">Saldo Awal (Rp)</label>
+                    <input 
+                        type="text" 
+                        id="initialBalanceInput" 
+                        placeholder="Contoh: 5000000" 
+                        min="0" 
+                        step="1000"
+                        required
+                    >
+                </div>
+                <button type="submit" class="btn btn-primary" id="saveInitialBalanceBtn">
+                    <span class="btn-text">Simpan Saldo Awal</span>
+                </button>
+            </form>
+            <div id="currentBalanceDisplay" class="current-balance hidden">
+                <p>Saldo Awal Tersimpan: <strong id="savedBalanceAmount">Rp 0</strong></p>
+            </div>
+        </section>
+
+        <!-- Transaction Input Section -->
+        <section class="card transaction-input-section">
+            <h2>📝 Input Transaksi</h2>
+            <form id="transactionForm" class="form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="transactionType">Tipe Transaksi</label>
+                        <select id="transactionType" required>
+                            <option value="">Pilih Tipe</option>
+                            <option value="income">Pemasukan</option>
+                            <option value="expense">Pengeluaran</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="transactionCategory">Kategori</label>
+                        <select id="transactionCategory" required disabled>
+                            <option value="">Pilih tipe terlebih dahulu</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="transactionAmount">Jumlah (Rp)</label>
+                        <input 
+                            type="text" 
+                            id="transactionAmount" 
+                            placeholder="Contoh: 50000" 
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="transactionDate">Tanggal</label>
+                        <input 
+                            type="date" 
+                            id="transactionDate" 
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="transactionDescription">Deskripsi</label>
+                    <input 
+                        type="text" 
+                        id="transactionDescription" 
+                        placeholder="Contoh: Gaji bulanan, Makan siang, dll." 
+                        maxlength="100"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="addTransactionBtn">
+                    <span class="btn-text">Tambah Transaksi</span>
+                </button>
+            </form>
+        </section>
+
+        <!-- Filter Section -->
+        <section class="card filter-section">
+            <h2>🔍 Filter Transaksi</h2>
+            <div class="filter-controls">
+                <label for="timeFilter">Tampilkan:</label>
+                <select id="timeFilter" class="filter-select">
+                    <option value="all">Semua Transaksi</option>
+                    <option value="today">Hari Ini</option>
+                    <option value="week">Minggu Ini</option>
+                    <option value="month">Bulan Ini</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Transaction List Section -->
+        <section class="card transaction-list-section">
+            <h2>📋 Riwayat Transaksi</h2>
+            <div id="transactionList" class="transaction-list">
+                <div class="empty-state" id="emptyState">
+                    <p>📭 Belum ada transaksi</p>
+                    <p class="empty-state-subtitle">Mulai tambahkan transaksi pertama Anda!</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Alert/Toast Notification -->
+    <div id="alertToast" class="alert-toast hidden">
+        <span id="alertMessage"></span>
+    </div>
+
+    <!-- Firebase SDK v9+ (Modular) -->
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
