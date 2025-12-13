@@ -1,6 +1,3 @@
-/* ==========================================
-   CSS VARIABLES - Easy Theme Customization
-   ========================================== */
 :root {
     /* Primary Colors */
     --primary-color: #43afd3;
@@ -293,7 +290,6 @@ body {
 .expense-card {
     background: linear-gradient(135deg, var(--expense-color) 0%, #dc2626 100%);
     color: white;
-    /* text-shadow: 0 0 10px rgb(255, 255, 255); */
 }
 
 .summary-icon {
