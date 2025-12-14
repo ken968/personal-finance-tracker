@@ -1,5 +1,7 @@
 # 📘 Personal Finance Tracker - Deployment Guide
 
+<img width="1662" height="955" alt="ui" src="https://github.com/user-attachments/assets/cbad0f26-e63d-41d4-b75e-ef5f0d0171e8" />
+
 ## 🎯 Overview
 
 Personal Finance Tracker adalah aplikasi web modern untuk mengelola keuangan pribadi dengan fitur:
