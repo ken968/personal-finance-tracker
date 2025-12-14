@@ -76,6 +76,15 @@ function initializeApp() {
 
 function setupEventListeners() {
     initialBalanceForm.addEventListener('submit', handleInitialBalanceSubmit);
+    
+    // Input Formatting Listeners
+    initialBalanceInput.addEventListener('input', (e) => {
+        formatInputNumber(e.target);
+    });
+    
+    transactionAmount.addEventListener('input', (e) => {
+        formatInputNumber(e.target);
+    });
 
     transactionForm.addEventListener('submit', handleTransactionSubmit);
     transactionType.addEventListener('change', handleTypeChange);
@@ -113,7 +122,7 @@ async function loadInitialBalance() {
 async function handleInitialBalanceSubmit(e) {
     e.preventDefault();
 
-    const amount = parseFloat(initialBalanceInput.value);
+    const amount = parseFormattedNumber(initialBalanceInput.value);
 
     if (isNaN(amount) || amount < 0) {
         showAlert('Masukkan jumlah yang valid', 'error');
@@ -169,7 +178,7 @@ function handleTypeChange() {
 
         const type = transactionType.value;
         const category = transactionCategory.value;
-        const amount = parseFloat(transactionAmount.value);
+        const amount = parseFormattedNumber(transactionAmount.value);
         const date = transactionDate.value;
         const description = transactionDescription.value.trim();
 
@@ -210,7 +219,8 @@ function handleTypeChange() {
     }
 
 function listenToTransactions() {
-    const q = query(collection(db, 'transactions'), orderBy('date', 'desc'));
+    // Order by date desc, then by createdAt desc for same-day transactions
+    const q = query(collection(db, 'transactions'), orderBy('date', 'desc'), orderBy('createdAt', 'desc'));
 
     onSnapshot(q, (snapshot) => {
         transactions = [];
@@ -322,13 +332,13 @@ function createTransactionElement(transaction) {
                 <span class="transaction-category">${transaction.category}</span>
             </div>
             <p class="transaction-description">${transaction.description}</p>
-            <p class="transaction-date">📅 ${formattedDate}</p>
+            <p class="transaction-date">${formattedDate}</p>
         </div>
         <div class="transaction-amount ${transaction.type}">
             ${transaction.type === 'income' ? '+' : '-'} ${formattedAmount}
         </div>
         <button class="btn btn-danger" onclick="deleteTransaction('${transaction.id}')">
-            🗑️ Hapus
+            Hapus
         </button>
     `;
 
@@ -339,25 +349,36 @@ function createTransactionElement(transaction) {
 // DASHBOARD CALCULATIONS
 // ==========================================
 function updateDashboard() {
-    const filteredTransactions = filterTransactions();
+    // Calculate TOTAL BALANCE (All time, ignoring filter)
+    let totalIncomeAll = 0;
+    let totalExpenseAll = 0;
 
-    let income = 0;
-    let expense = 0;
-
-    filteredTransactions.forEach(transaction => {
+    transactions.forEach(transaction => {
         if (transaction.type === 'income') {
-            income += transaction.amount;
+            totalIncomeAll += transaction.amount;
         } else if (transaction.type === 'expense') {
-            expense += transaction.amount;
+            totalExpenseAll += transaction.amount;
         }
     });
 
-    // Calculate final balance: Initial Balance + Total Income - Total Expense
-    const final = initialBalance + income - expense;
+    const final = initialBalance + totalIncomeAll - totalExpenseAll;
+
+    // Calculate DISPLAYED Income/Expense (Respected filter)
+    const filteredTransactions = filterTransactions();
+    let displayedIncome = 0;
+    let displayedExpense = 0;
+
+    filteredTransactions.forEach(transaction => {
+        if (transaction.type === 'income') {
+            displayedIncome += transaction.amount;
+        } else if (transaction.type === 'expense') {
+            displayedExpense += transaction.amount;
+        }
+    });
 
     // Update display
-    totalIncome.textContent = formatCurrency(income);
-    totalExpense.textContent = formatCurrency(expense);
+    totalIncome.textContent = formatCurrency(displayedIncome);
+    totalExpense.textContent = formatCurrency(displayedExpense);
     finalBalance.textContent = formatCurrency(final);
 }
 
@@ -398,6 +419,26 @@ function showAlert(message, type = 'success') {
     setTimeout(() => {
         alertToast.classList.add('hidden');
     }, 3000);
+}
+
+function formatInputNumber(input) {
+    // Remove non-digit characters
+    let value = input.value.replace(/\D/g, '');
+    
+    if (value === '') {
+        input.value = '';
+        return;
+    }
+    
+    // Format with dots
+    value = parseInt(value, 10).toLocaleString('id-ID');
+    input.value = value;
+}
+
+function parseFormattedNumber(value) {
+    if (!value) return 0;
+    // Remove dots before parsing
+    return parseFloat(value.replace(/\./g, ''));
 }
 
 // ==========================================

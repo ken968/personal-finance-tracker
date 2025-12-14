@@ -25,7 +25,7 @@
 
          <!-- Dashboard Summary Section -->
         <section class="card dashboard-section">
-            <h2>📊 Dashboard Keuangan</h2>
+            <h2>Dashboard Keuangan</h2>
             
             <div class="summary-cards">
                 <div class="summary-card balance-card">
@@ -56,17 +56,16 @@
 
         <!-- Initial Balance Setup Section -->
         <section class="card initial-balance-section">
-            <h2>⚙️ Setup Saldo Awal</h2>
+            <h2>Setup Saldo Awal</h2>
             <p class="section-description">Masukkan total uang Anda saat ini (Cash + Bank + Dompet Digital)</p>
             <form id="initialBalanceForm" class="form">
                 <div class="form-group">
                     <label for="initialBalanceInput">Saldo Awal (Rp)</label>
                     <input 
                         type="text" 
+                        inputmode="numeric"
                         id="initialBalanceInput" 
-                        placeholder="Contoh: 5000000" 
-                        min="0" 
-                        step="1000"
+                        placeholder="Contoh: 5.000.000" 
                         required
                     >
                 </div>
@@ -81,7 +80,7 @@
 
         <!-- Transaction Input Section -->
         <section class="card transaction-input-section">
-            <h2>📝 Input Transaksi</h2>
+            <h2>Input Transaksi</h2>
             <form id="transactionForm" class="form">
                 <div class="form-row">
                     <div class="form-group">
@@ -105,8 +104,9 @@
                         <label for="transactionAmount">Jumlah (Rp)</label>
                         <input 
                             type="text" 
+                            inputmode="numeric"
                             id="transactionAmount" 
-                            placeholder="Contoh: 50000" 
+                            placeholder="Contoh: 50.000" 
                             required
                         >
                     </div>
@@ -139,7 +139,7 @@
 
         <!-- Filter Section -->
         <section class="card filter-section">
-            <h2>🔍 Filter Transaksi</h2>
+            <h2>Filter Transaksi</h2>
             <div class="filter-controls">
                 <label for="timeFilter">Tampilkan:</label>
                 <select id="timeFilter" class="filter-select">
@@ -153,7 +153,7 @@
 
         <!-- Transaction List Section -->
         <section class="card transaction-list-section">
-            <h2>📋 Riwayat Transaksi</h2>
+            <h2>Riwayat Transaksi</h2>
             <div id="transactionList" class="transaction-list">
                 <div class="empty-state" id="emptyState">
                     <p>📭 Belum ada transaksi</p>
