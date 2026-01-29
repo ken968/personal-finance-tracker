@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Transaction History</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#10b77f",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#10221c", // Deep navy/emerald mix
+                        "surface-dark": "#162e26", // Slightly lighter for cards/inputs
+                        "accent-green": "#326755", // Border/accent color
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #326755;
+            border-radius: 3px;
+        }
+        /* Remove default date icon in some browsers to use custom icon */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.6;
+            cursor: pointer;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display antialiased min-h-screen flex flex-col overflow-x-hidden selection:bg-primary selection:text-white">
+<!-- Top App Bar -->
+<div class="sticky top-0 z-50 bg-background-light dark:bg-background-dark border-b border-gray-200 dark:border-accent-green/30">
+<div class="flex items-center p-4 pb-2 justify-between max-w-md mx-auto w-full">
+<h2 class="text-xl font-bold leading-tight tracking-tight flex-1">History</h2>
+<div class="flex items-center justify-end gap-2">
+<button class="flex items-center justify-center rounded-full h-10 w-10 bg-primary/10 hover:bg-primary/20 text-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">search</span>
+</button>
+<button class="flex items-center justify-center rounded-full h-10 w-10 bg-primary text-background-dark shadow-lg shadow-primary/20 hover:brightness-110 transition-all">
+<span class="material-symbols-outlined text-[24px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col max-w-md mx-auto w-full pb-20">
+<!-- Filter Section -->
+<div class="px-4 py-4 space-y-4">
+<div class="flex items-center justify-between">
+<h3 class="text-lg font-bold tracking-tight">Filter by Date</h3>
+<button class="text-xs font-medium text-primary hover:text-primary/80">Reset</button>
+</div>
+<div class="flex gap-3">
+<div class="flex-1 space-y-1">
+<label class="text-xs text-slate-500 dark:text-slate-400 font-medium ml-1">Start Date</label>
+<div class="relative">
+<input class="form-input flex w-full rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-accent-green bg-white dark:bg-surface-dark h-12 px-3 text-sm font-medium leading-normal shadow-sm" type="date" value="2023-10-01"/>
+</div>
+</div>
+<div class="flex-1 space-y-1">
+<label class="text-xs text-slate-500 dark:text-slate-400 font-medium ml-1">End Date</label>
+<div class="relative">
+<input class="form-input flex w-full rounded-lg text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-300 dark:border-accent-green bg-white dark:bg-surface-dark h-12 px-3 text-sm font-medium leading-normal shadow-sm" type="date" value="2023-10-31"/>
+</div>
+</div>
+</div>
+<button class="w-full flex items-center justify-center overflow-hidden rounded-lg h-11 bg-primary text-background-dark text-sm font-bold leading-normal tracking-wide hover:brightness-105 active:scale-[0.98] transition-all shadow-lg shadow-primary/10">
+                Apply Filter
+            </button>
+</div>
+<div class="h-px bg-gray-200 dark:bg-accent-green/30 mx-4 my-2"></div>
+<!-- Transactions List -->
+<!-- Group: Today -->
+<div class="flex flex-col">
+<div class="px-4 pt-4 pb-2 flex items-baseline justify-between">
+<h3 class="text-base font-bold text-slate-900 dark:text-white">Today</h3>
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400">Oct 24</span>
+</div>
+<div class="px-4 space-y-3">
+<!-- Transaction Item 1 -->
+<div class="group relative flex items-center gap-4 p-3 rounded-xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-accent-green/20 shadow-sm transition-all hover:border-primary/30">
+<!-- Icon -->
+<div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400">
+<span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+</div>
+<!-- Content -->
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between mb-0.5">
+<h4 class="text-sm font-semibold truncate">Groceries</h4>
+<span class="text-sm font-bold text-slate-900 dark:text-white">-$120.50</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs text-slate-500 dark:text-slate-400 truncate">Whole Foods Market</span>
+<!-- Actions (Hidden by default, visible on hover/focus in desktop, always visible subtly on mobile) -->
+<div class="flex items-center gap-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+<button aria-label="Edit" class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button aria-label="Delete" class="text-slate-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Transaction Item 2 -->
+<div class="group relative flex items-center gap-4 p-3 rounded-xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-accent-green/20 shadow-sm transition-all hover:border-primary/30">
+<div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined text-[20px]">directions_car</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between mb-0.5">
+<h4 class="text-sm font-semibold truncate">Uber Ride</h4>
+<span class="text-sm font-bold text-slate-900 dark:text-white">-$24.00</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs text-slate-500 dark:text-slate-400 truncate">Transportation</span>
+<div class="flex items-center gap-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="text-slate-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Group: Yesterday -->
+<div class="flex flex-col mt-4">
+<div class="px-4 pt-4 pb-2 flex items-baseline justify-between">
+<h3 class="text-base font-bold text-slate-900 dark:text-white">Yesterday</h3>
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400">Oct 23</span>
+</div>
+<div class="px-4 space-y-3">
+<!-- Transaction Item 3 (Income) -->
+<div class="group relative flex items-center gap-4 p-3 rounded-xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-accent-green/20 shadow-sm transition-all hover:border-primary/30">
+<div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between mb-0.5">
+<h4 class="text-sm font-semibold truncate">Freelance Payment</h4>
+<span class="text-sm font-bold text-primary">+$1,250.00</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs text-slate-500 dark:text-slate-400 truncate">Design Project</span>
+<div class="flex items-center gap-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="text-slate-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Transaction Item 4 -->
+<div class="group relative flex items-center gap-4 p-3 rounded-xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-accent-green/20 shadow-sm transition-all hover:border-primary/30">
+<div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400">
+<span class="material-symbols-outlined text-[20px]">movie</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between mb-0.5">
+<h4 class="text-sm font-semibold truncate">Netflix Subscription</h4>
+<span class="text-sm font-bold text-slate-900 dark:text-white">-$15.99</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs text-slate-500 dark:text-slate-400 truncate">Entertainment</span>
+<div class="flex items-center gap-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="text-slate-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Group: Earlier -->
+<div class="flex flex-col mt-4">
+<div class="px-4 pt-4 pb-2 flex items-baseline justify-between">
+<h3 class="text-base font-bold text-slate-900 dark:text-white">Oct 20, 2023</h3>
+</div>
+<div class="px-4 space-y-3">
+<!-- Transaction Item 5 -->
+<div class="group relative flex items-center gap-4 p-3 rounded-xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-accent-green/20 shadow-sm transition-all hover:border-primary/30">
+<div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+<span class="material-symbols-outlined text-[20px]">fitness_center</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between mb-0.5">
+<h4 class="text-sm font-semibold truncate">Gym Membership</h4>
+<span class="text-sm font-bold text-slate-900 dark:text-white">-$45.00</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs text-slate-500 dark:text-slate-400 truncate">Health &amp; Fitness</span>
+<div class="flex items-center gap-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="text-slate-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Transaction Item 6 -->
+<div class="group relative flex items-center gap-4 p-3 rounded-xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-accent-green/20 shadow-sm transition-all hover:border-primary/30">
+<div class="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400">
+<span class="material-symbols-outlined text-[20px]">restaurant</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between mb-0.5">
+<h4 class="text-sm font-semibold truncate">Dinner w/ Friends</h4>
+<span class="text-sm font-bold text-slate-900 dark:text-white">-$85.20</span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-xs text-slate-500 dark:text-slate-400 truncate">Dining Out</span>
+<div class="flex items-center gap-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="text-slate-400 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Fixed for iOS) -->
+<nav class="fixed bottom-0 z-50 w-full bg-white dark:bg-background-dark border-t border-gray-200 dark:border-accent-green/30 pb-safe">
+<div class="flex items-center justify-around h-16 max-w-md mx-auto">
+<button class="flex flex-col items-center justify-center w-full h-full text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors gap-1">
+<span class="material-symbols-outlined text-[24px]">home</span>
+<span class="text-[10px] font-medium">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center w-full h-full text-primary gap-1">
+<span class="material-symbols-outlined text-[24px] fill-current">history</span>
+<span class="text-[10px] font-medium">History</span>
+</button>
+<button class="flex flex-col items-center justify-center w-full h-full text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors gap-1">
+<span class="material-symbols-outlined text-[24px]">pie_chart</span>
+<span class="text-[10px] font-medium">Reports</span>
+</button>
+<button class="flex flex-col items-center justify-center w-full h-full text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary transition-colors gap-1">
+<span class="material-symbols-outlined text-[24px]">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</button>
+</div>
+</nav>
+<!-- Safe area spacing for bottom nav -->
+<div class="h-20"></div>
+</body></html>

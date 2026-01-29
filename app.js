@@ -1,448 +1,335 @@
 // ==========================================
-// IMPORT FIREBASE FIRESTORE
+// MAIN APPLICATION - Personal Finance Tracker
 // ==========================================
-import { db } from './firebase-config.js';
-import {
-    collection,
-    doc,
-    setDoc,
-    getDoc,
-    getDocs,
-    addDoc,
-    deleteDoc,
-    onSnapshot,
-    query,
-    orderBy,
-    Timestamp
-} from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+import { initializeDefaultCategories } from './services/category-service.js';
+import { renderDashboard } from './components/dashboard.js';
+import { renderTransactionHistory } from './components/transaction-history.js';
+import { renderManageCategories } from './components/manage-categories.js';
+import { openTransactionModal } from './components/transaction-modal.js';
+import { getSettings, updateInitialBalance } from './services/settings-service.js';
+import { formatInputCurrency, getRawNumber } from './utils/helpers.js';
 
-// ==========================================
-// GLOBAL VARIABLES
-// ==========================================
-let initialBalance = 0;
-let transactions = [];
-let currentFilter = 'all';
+// Current active section
+let currentSection = 'dashboard';
 
-// ==========================================
-// DOM ELEMENTS
-// ==========================================
-// Forms
-const initialBalanceForm = document.getElementById('initialBalanceForm');
-const transactionForm = document.getElementById('transactionForm');
+/**
+ * Initialize the application
+ */
+async function initApp() {
+    try {
+        console.log('Initializing Personal Finance Tracker...');
 
-// Inputs
-const initialBalanceInput = document.getElementById('initialBalanceInput');
-const transactionType = document.getElementById('transactionType');
-const transactionCategory = document.getElementById('transactionCategory');
-const transactionAmount = document.getElementById('transactionAmount');
-const transactionDate = document.getElementById('transactionDate');
-const transactionDescription = document.getElementById('transactionDescription');
-const timeFilter = document.getElementById('timeFilter');
+        // Show loading state
+        showLoading();
 
-// Display Elements
-const currentBalanceDisplay = document.getElementById('currentBalanceDisplay');
-const savedBalanceAmount = document.getElementById('savedBalanceAmount');
-const finalBalance = document.getElementById('finalBalance');
-const totalIncome = document.getElementById('totalIncome');
-const totalExpense = document.getElementById('totalExpense');
-const transactionList = document.getElementById('transactionList');
-const emptyState = document.getElementById('emptyState');
-const loadingOverlay = document.getElementById('loadingOverlay');
-const alertToast = document.getElementById('alertToast');
-const alertMessage = document.getElementById('alertMessage');
+        // Initialize default categories if needed
+        await initializeDefaultCategories();
 
-// ==========================================
-// CATEGORY DEFINITIONS
-// ==========================================
-const categories = {
-    income: ['Gaji', 'Bonus', 'Investasi', 'Uang Ortu', 'Lainnya'],
-    expense: ['Makanan', 'Transport', 'Hiburan', 'Tagihan', 'Belanja', 'Kesehatan', 'Lainnya']
-};
+        // Set up navigation
+        setupNavigation();
 
-// ==========================================
-// INITIALIZATION
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-    initializeApp();
-    setupEventListeners();
-    setDefaultDate();
-});
+        // Load initial section (dashboard)
+        await navigateToSection('dashboard');
 
-function initializeApp() {
-    showLoading(true);
-    loadInitialBalance();
-    listenToTransactions();
+        // Hide loading state
+        hideLoading();
+
+        console.log('Application initialized successfully!');
+    } catch (error) {
+        console.error('Error initializing application:', error);
+        hideLoading();
+        showError('Failed to initialize application: ' + error.message);
+    }
 }
 
-function setupEventListeners() {
-    initialBalanceForm.addEventListener('submit', handleInitialBalanceSubmit);
-    
-    // Input Formatting Listeners
-    initialBalanceInput.addEventListener('input', (e) => {
-        formatInputNumber(e.target);
-    });
-    
-    transactionAmount.addEventListener('input', (e) => {
-        formatInputNumber(e.target);
+/**
+ * Set up navigation event listeners
+ */
+function setupNavigation() {
+    // Bottom navigation buttons
+    document.querySelectorAll('[data-nav]').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            const section = button.dataset.nav;
+            navigateToSection(section);
+        });
     });
 
-    transactionForm.addEventListener('submit', handleTransactionSubmit);
-    transactionType.addEventListener('change', handleTypeChange);
+    // Floating action button (add transaction)
+    document.getElementById('fab-add-transaction')?.addEventListener('click', () => {
+        openTransactionModal();
+    });
 
-    timeFilter.addEventListener('change', handleFilterChange);
-}
-
-function setDefaultDate() {
-    const today = new Date().toISOString().split('T')[0];
-    transactionDate.value = today;
-}
-
-// ==========================================
-// INITIAL BALANCE FUNCTIONS
-// ==========================================
-async function loadInitialBalance() {
-    try {
-        const docRef = doc(db, 'settings', 'initialBalance');
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-            initialBalance = docSnap.data().amount || 0;
-            initialBalanceInput.value = initialBalance;
-            savedBalanceAmount.textContent = formatCurrency(initialBalance);
-            currentBalanceDisplay.classList.remove('hidden');
-        }
-
-        updateDashboard();
-    } catch (error) {
-        console.error('Error loading initial balance:', error);
-        showAlert('Gagal memuat saldo awal', 'error');
-    }
-}
-
-async function handleInitialBalanceSubmit(e) {
-    e.preventDefault();
-
-    const amount = parseFormattedNumber(initialBalanceInput.value);
-
-    if (isNaN(amount) || amount < 0) {
-        showAlert('Masukkan jumlah yang valid', 'error');
-        return;
-    }
-
-    try {
-        showLoading(true);
-
-        const docRef = doc(db, 'settings', 'initialBalance');
-        await setDoc(docRef, {
-            amount: amount,
-            updatedAt: Timestamp.now()
+    // Add transaction buttons in header
+    document.querySelectorAll('.add-transaction-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            openTransactionModal();
         });
-
-        initialBalance = amount;
-        savedBalanceAmount.textContent = formatCurrency(amount);
-        currentBalanceDisplay.classList.remove('hidden');
-
-        updateDashboard();
-        showAlert('Saldo awal berhasil disimpan!', 'success');
-    } catch (error) {
-        console.error('Error saving initial balance:', error);
-        showAlert('Gagal menyimpan saldo awal', 'error');
-    } finally {
-        showLoading(false);
-    }
-}
-
-// ==========================================
-// TRANSACTION FUNCTIONS
-// ==========================================
-function handleTypeChange() {
-    const type = transactionType.value;
-
-    transactionCategory.innerHTML = '<option value="">Pilih Kategori</option>';
-
-    if (type && categories[type]) {
-        categories[type].forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat;
-            option.textContent = cat;
-            transactionCategory.appendChild(option);
-        });
-        transactionCategory.disabled = false;
-    } else {
-        transactionCategory.disabled = true;
-    }
-}
-
-    async function handleTransactionSubmit(e) {
-        e.preventDefault();
-
-        const type = transactionType.value;
-        const category = transactionCategory.value;
-        const amount = parseFormattedNumber(transactionAmount.value);
-        const date = transactionDate.value;
-        const description = transactionDescription.value.trim();
-
-        // Validation
-        if (!type || !category || isNaN(amount) || amount <= 0 || !date || !description) {
-            showAlert('Mohon lengkapi semua field', 'error');
-            return;
-        }
-
-        try {
-            showLoading(true);
-
-            // Convert date string to Timestamp
-            const dateObj = new Date(date);
-
-            await addDoc(collection(db, 'transactions'), {
-                type: type,
-                category: category,
-                amount: amount,
-                date: Timestamp.fromDate(dateObj),
-                description: description,
-                createdAt: Timestamp.now()
-            });
-
-            // Reset form
-            transactionForm.reset();
-            transactionCategory.disabled = true;
-            transactionCategory.innerHTML = '<option value="">Pilih tipe terlebih dahulu</option>';
-            setDefaultDate();
-
-            showAlert('Transaksi berhasil ditambahkan!', 'success');
-        } catch (error) {
-            console.error('Error adding transaction:', error);
-            showAlert('Gagal menambahkan transaksi', 'error');
-        } finally {
-            showLoading(false);
-        }
-    }
-
-function listenToTransactions() {
-    // Order by date desc, then by createdAt desc for same-day transactions
-    const q = query(collection(db, 'transactions'), orderBy('date', 'desc'), orderBy('createdAt', 'desc'));
-
-    onSnapshot(q, (snapshot) => {
-        transactions = [];
-        snapshot.forEach((doc) => {
-            transactions.push({
-                id: doc.id,
-                ...doc.data()
-            });
-        });
-
-        renderTransactions();
-        updateDashboard();
-        showLoading(false);
-    }, (error) => {
-        console.error('Error listening to transactions:', error);
-        showAlert('Gagal memuat transaksi', 'error');
-        showLoading(false);
     });
 }
 
-async function deleteTransaction(id) {
-    if (!confirm('Yakin ingin menghapus transaksi ini?')) {
-        return;
+/**
+ * Navigate to a specific section
+ * @param {string} section - Section name ('dashboard', 'history', 'categories', 'settings')
+ */
+async function navigateToSection(section) {
+    currentSection = section;
+
+    // Update navigation states
+    updateNavigationStates(section);
+
+    // Hide all sections
+    document.querySelectorAll('.app-section').forEach(el => {
+        el.classList.remove('active');
+        el.classList.add('hidden');
+    });
+
+    // Show selected section
+    const sectionElement = document.getElementById(`${section}-section`);
+    if (sectionElement) {
+        sectionElement.classList.remove('hidden');
+        sectionElement.classList.add('active');
     }
 
+    // Render section content
     try {
-        showLoading(true);
-        await deleteDoc(doc(db, 'transactions', id));
-        showAlert('Transaksi berhasil dihapus', 'success');
-    } catch (error) {
-        console.error('Error deleting transaction:', error);
-        showAlert('Gagal menghapus transaksi', 'error');
-    } finally {
-        showLoading(false);
-    }
-}
-
-// ==========================================
-// FILTER FUNCTIONS
-// ==========================================
-function handleFilterChange() {
-    currentFilter = timeFilter.value;
-    renderTransactions();
-    updateDashboard();
-}
-
-function filterTransactions() {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-    return transactions.filter(transaction => {
-        const transactionDate = transaction.date.toDate();
-
-        switch (currentFilter) {
-            case 'today':
-                return transactionDate >= today;
-
-            case 'week':
-                const weekAgo = new Date(today);
-                weekAgo.setDate(weekAgo.getDate() - 7);
-                return transactionDate >= weekAgo;
-
-            case 'month':
-                const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-                return transactionDate >= monthStart;
-
-            case 'all':
+        switch (section) {
+            case 'dashboard':
+                await renderDashboard();
+                break;
+            case 'history':
+                await renderTransactionHistory();
+                break;
+            case 'categories':
+                await renderManageCategories();
+                break;
+            case 'settings':
+                await renderSettings();
+                break;
             default:
-                return true;
+                console.warn('Unknown section:', section);
+        }
+    } catch (error) {
+        console.error('Error rendering section:', error);
+        showError('Failed to load section: ' + error.message);
+    }
+}
+
+/**
+ * Update navigation button states
+ */
+function updateNavigationStates(activeSection) {
+    document.querySelectorAll('[data-nav]').forEach(button => {
+        const section = button.dataset.nav;
+
+        if (section === activeSection) {
+            button.classList.add('active', 'text-primary');
+            button.classList.remove('text-slate-500', 'dark:text-slate-500');
+        } else {
+            button.classList.remove('active', 'text-primary');
+            button.classList.add('text-slate-400', 'dark:text-slate-500', 'hover:text-primary', 'dark:hover:text-primary');
         }
     });
 }
 
-// ==========================================
-// RENDER FUNCTIONS
-// ==========================================
-function renderTransactions() {
-    const filteredTransactions = filterTransactions();
+/**
+ * Render settings section
+ */
+async function renderSettings() {
+    const container = document.getElementById('settings-section');
+    if (!container) return;
 
-    // Clear list
-    transactionList.innerHTML = '';
+    try {
+        const settings = await getSettings();
 
-    if (filteredTransactions.length === 0) {
-        transactionList.appendChild(emptyState);
-        emptyState.classList.remove('hidden');
-        return;
-    }
+        container.innerHTML = `
+    <div class="flex-1 flex flex-col w-full max-w-7xl mx-auto p-6 pb-24">
+      <h1 class="text-[28px] font-bold leading-tight tracking-tight mb-8 text-white">Settings</h1>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- App Info -->
+        <div class="rounded-3xl bg-[#1c2e36] p-6 shadow-xl border border-white/5 h-full">
+          <div class="size-12 rounded-2xl bg-primary/20 flex items-center justify-center mb-4 text-primary">
+             <span class="material-symbols-outlined text-[24px]">info</span>
+          </div>
+          <h2 class="text-xl font-bold mb-2 text-white">Personal Finance Tracker</h2>
+          <p class="text-sm text-slate-400 mb-4">Version 1.2.0</p>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Manage your personal finances with ease. Track income, expenses, and visualize your cashflow in real-time.
+          </p>
+        </div>
 
-    emptyState.classList.add('hidden');
-
-    filteredTransactions.forEach(transaction => {
-        const item = createTransactionElement(transaction);
-        transactionList.appendChild(item);
-    });
-}
-
-function createTransactionElement(transaction) {
-    const div = document.createElement('div');
-    div.className = `transaction-item ${transaction.type}`;
-
-    const formattedDate = formatDate(transaction.date.toDate());
-    const formattedAmount = formatCurrency(transaction.amount);
-    const typeText = transaction.type === 'income' ? 'Pemasukan' : 'Pengeluaran';
-
-    div.innerHTML = `
-        <div class="transaction-info">
-            <div class="transaction-header">
-                <span class="transaction-type-badge ${transaction.type}">${typeText}</span>
-                <span class="transaction-category">${transaction.category}</span>
+        <!-- Financial Setup (New) -->
+        <div class="rounded-3xl bg-[#1c2e36] p-6 shadow-xl border border-white/5 h-full">
+          <div class="size-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center mb-4 text-emerald-400">
+             <span class="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+          </div>
+          <h2 class="text-xl font-bold mb-4 text-white">Financial Setup</h2>
+          
+          <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Initial Balance</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">Rp</span>
+                    <input 
+                        type="text"
+                        inputmode="numeric" 
+                        id="initial-balance-input" 
+                        value="${settings.initialBalance || 0}" 
+                        class="w-full bg-black/20 border border-white/10 rounded-xl px-4 pl-10 py-3 text-white placeholder-slate-500 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none font-mono"
+                        placeholder="0"
+                    >
+                </div>
+                <p class="text-[10px] text-slate-500 mt-2">Saldo awal dompet manual (sebelum transaksi dicatat).</p>
             </div>
-            <p class="transaction-description">${transaction.description}</p>
-            <p class="transaction-date">${formattedDate}</p>
+            
+            <button 
+                id="save-balance-btn"
+                class="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2 shadow-lg shadow-primary/25"
+            >
+                <span class="material-symbols-outlined text-[20px]">save</span>
+                <span>Save Balance</span>
+            </button>
+          </div>
         </div>
-        <div class="transaction-amount ${transaction.type}">
-            ${transaction.type === 'income' ? '+' : '-'} ${formattedAmount}
+        
+        <!-- Quick Actions -->
+        <div class="rounded-3xl bg-[#1c2e36] p-6 shadow-xl border border-white/5 h-full">
+          <div class="size-12 rounded-2xl bg-orange-500/20 flex items-center justify-center mb-4 text-orange-400">
+             <span class="material-symbols-outlined text-[24px]">bolt</span>
+          </div>
+          <h2 class="text-xl font-bold mb-4 text-white">Quick Actions</h2>
+          <div class="space-y-3">
+            <button 
+              class="w-full flex items-center justify-between p-4 rounded-xl bg-black/20 hover:bg-black/30 border border-white/5 hover:border-primary/30 transition-all text-left group"
+              onclick="window.location.reload()"
+            >
+              <span class="text-sm font-medium text-white group-hover:text-primary transition-colors">Refresh App</span>
+              <span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">refresh</span>
+            </button>
+            <button 
+              data-nav="categories"
+              class="w-full flex items-center justify-between p-4 rounded-xl bg-black/20 hover:bg-black/30 border border-white/5 hover:border-primary/30 transition-all text-left group"
+            >
+              <span class="text-sm font-medium text-white group-hover:text-primary transition-colors">Manage Categories</span>
+              <span class="material-symbols-outlined text-slate-400 group-hover:text-primary transition-colors">arrow_forward</span>
+            </button>
+          </div>
         </div>
-        <button class="btn btn-danger" onclick="deleteTransaction('${transaction.id}')">
-            Hapus
-        </button>
+        
+        <!-- About -->
+        <div class="rounded-3xl bg-[#1c2e36] p-6 shadow-xl border border-white/5 h-full">
+          <div class="size-12 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-4 text-blue-400">
+             <span class="material-symbols-outlined text-[24px]">code</span>
+          </div>
+          <h2 class="text-xl font-bold mb-4 text-white">Technology</h2>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Built with modern web technologies for maximum performance and reliability.
+            <br><br>
+            <span class="inline-block px-2 py-1 rounded bg-black/30 text-xs font-mono text-primary mr-1">Firebase</span>
+            <span class="inline-block px-2 py-1 rounded bg-black/30 text-xs font-mono text-blue-400 mr-1">Tailwind</span>
+            <span class="inline-block px-2 py-1 rounded bg-black/30 text-xs font-mono text-yellow-400">Chart.js</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  `;
+
+        // Setup event listener for Save button
+        document.getElementById('save-balance-btn')?.addEventListener('click', async () => {
+            const btn = document.getElementById('save-balance-btn');
+            const input = document.getElementById('initial-balance-input');
+            const originalText = btn.innerHTML;
+
+            try {
+                // Show loading
+                btn.innerHTML = '<span class="size-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> Saving...';
+                btn.disabled = true;
+
+                await updateInitialBalance(getRawNumber(input.value));
+
+                // Show success
+                btn.innerHTML = '<span class="material-symbols-outlined">check</span> Saved!';
+                btn.classList.add('bg-emerald-500', 'hover:bg-emerald-500');
+                btn.classList.remove('bg-primary', 'hover:bg-primary/90');
+
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    btn.classList.remove('bg-emerald-500', 'hover:bg-emerald-500');
+                    btn.classList.add('bg-primary', 'hover:bg-primary/90');
+                }, 2000);
+
+            } catch (error) {
+                console.error(error);
+                btn.innerHTML = 'Error!';
+                btn.disabled = false;
+            }
+        });
+
+        // Setup input formatting
+        const balanceInput = document.getElementById('initial-balance-input');
+        if (balanceInput) {
+            formatInputCurrency(balanceInput);
+            balanceInput.addEventListener('input', (e) => formatInputCurrency(e.target));
+        }
+
+    } catch (error) {
+        console.error('Error rendering settings:', error);
+        container.innerHTML = '<div class="text-red-500 p-6">Error loading settings.</div>';
+    }
+
+    // Re-setup navigation for dynamically added buttons
+    setupNavigation();
+}
+
+/**
+ * Show loading state
+ */
+function showLoading() {
+    const loader = document.getElementById('app-loader');
+    if (loader) {
+        loader.classList.remove('hidden');
+    }
+}
+
+/**
+ * Hide loading state
+ */
+function hideLoading() {
+    const loader = document.getElementById('app-loader');
+    if (loader) {
+        loader.classList.add('hidden');
+    }
+}
+
+/**
+ * Show error message
+ */
+function showError(message) {
+    const errorContainer = document.getElementById('error-container');
+    if (errorContainer) {
+        errorContainer.innerHTML = `
+      <div class="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-lg">
+        ${message}
+      </div>
     `;
+        errorContainer.classList.remove('hidden');
 
-    return div;
-}
-
-// ==========================================
-// DASHBOARD CALCULATIONS
-// ==========================================
-function updateDashboard() {
-    // Calculate TOTAL BALANCE (All time, ignoring filter)
-    let totalIncomeAll = 0;
-    let totalExpenseAll = 0;
-
-    transactions.forEach(transaction => {
-        if (transaction.type === 'income') {
-            totalIncomeAll += transaction.amount;
-        } else if (transaction.type === 'expense') {
-            totalExpenseAll += transaction.amount;
-        }
-    });
-
-    const final = initialBalance + totalIncomeAll - totalExpenseAll;
-
-    // Calculate DISPLAYED Income/Expense (Respected filter)
-    const filteredTransactions = filterTransactions();
-    let displayedIncome = 0;
-    let displayedExpense = 0;
-
-    filteredTransactions.forEach(transaction => {
-        if (transaction.type === 'income') {
-            displayedIncome += transaction.amount;
-        } else if (transaction.type === 'expense') {
-            displayedExpense += transaction.amount;
-        }
-    });
-
-    // Update display
-    totalIncome.textContent = formatCurrency(displayedIncome);
-    totalExpense.textContent = formatCurrency(displayedExpense);
-    finalBalance.textContent = formatCurrency(final);
-}
-
-// ==========================================
-// UTILITY FUNCTIONS
-// ==========================================
-function formatCurrency(amount) {
-    return new Intl.NumberFormat('id-ID', {
-        style: 'currency',
-        currency: 'IDR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    }).format(amount);
-}
-
-function formatDate(date) {
-    return new Intl.DateTimeFormat('id-ID', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    }).format(date);
-}
-
-function showLoading(show) {
-    if (show) {
-        loadingOverlay.classList.remove('hidden');
-    } else {
-        loadingOverlay.classList.add('hidden');
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            errorContainer.classList.add('hidden');
+        }, 5000);
     }
 }
 
-function showAlert(message, type = 'success') {
-    alertMessage.textContent = message;
-    alertToast.className = `alert-toast ${type}`;
-    alertToast.classList.remove('hidden');
-
-    setTimeout(() => {
-        alertToast.classList.add('hidden');
-    }, 3000);
+// Initialize app when DOM is loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
 }
 
-function formatInputNumber(input) {
-    // Remove non-digit characters
-    let value = input.value.replace(/\D/g, '');
-    
-    if (value === '') {
-        input.value = '';
-        return;
-    }
-    
-    // Format with dots
-    value = parseInt(value, 10).toLocaleString('id-ID');
-    input.value = value;
-}
-
-function parseFormattedNumber(value) {
-    if (!value) return 0;
-    // Remove dots before parsing
-    return parseFloat(value.replace(/\./g, ''));
-}
-
-// ==========================================
-// EXPOSE FUNCTIONS TO GLOBAL SCOPE
-// (Required for inline onclick handlers)
-// ==========================================
-window.deleteTransaction = deleteTransaction;
+// Export for global access
+window.navigateToSection = navigateToSection;
+window.openTransactionModal = openTransactionModal;

@@ -1,6 +1,10 @@
 # 📘 Personal Finance Tracker - Deployment Guide
 
-<img width="1662" height="955" alt="ui" src="https://github.com/user-attachments/assets/cbad0f26-e63d-41d4-b75e-ef5f0d0171e8" />
+<div align="center">
+  <img src="new-ui/dashboard_overview/screen.png" width="30%" alt="Dashboard Overview" />
+  <img src="new-ui/transaction_history/screen.png" width="30%" alt="Transaction History" />
+  <img src="new-ui/manage_categories/screen.png" width="30%" alt="Manage Categories" />
+</div>
 
 ## 🎯 Overview
 
@@ -14,15 +18,27 @@ Personal Finance Tracker adalah aplikasi web modern untuk mengelola keuangan pri
 
 ---
 
-## 📁 File Structure
+## 📁 Folder Structure
 
 ```
 Personal Financial Tracker/
-├── index.html           # Struktur HTML semantic
-├── style.css            # Styling modern dengan CSS Variables
-├── firebase-config.js   # Konfigurasi Firebase
-├── app.js              # Logika aplikasi & Firestore integration
-└── README.md           # Dokumentasi (file ini)
+├── components/             # Reusable UI components (Dashboard, Modal, etc.)
+│   ├── dashboard.js
+│   ├── transaction-history.js
+│   ├── transaction-modal.js
+│   └── manage-categories.js
+├── services/               # Firebase & Business Logic services
+│   ├── firebase-service.js
+│   ├── transaction-service.js
+│   ├── category-service.js
+│   └── settings-service.js
+├── utils/                  # Utility & Helper functions
+│   └── helpers.js
+├── index.html              # Main application entry point
+├── style.css               # Modern UI styling with Tailwind & CSS
+├── app.js                  # Application initialization & routing
+├── firebase-config.js      # Firebase configuration
+└── README.md               # Project documentation
 ```
 
 ---

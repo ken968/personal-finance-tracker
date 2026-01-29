@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard Overview</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#10b77f",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#10221c",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar hiding */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display overflow-x-hidden antialiased selection:bg-primary selection:text-white">
+<div class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto shadow-2xl overflow-hidden bg-background-light dark:bg-background-dark">
+<!-- TopAppBar: Modified for Mobile Profile/Header -->
+<header class="flex items-center justify-between p-5 pt-8 bg-transparent sticky top-0 z-20 backdrop-blur-md">
+<div class="flex items-center gap-3">
+<div class="relative group cursor-pointer">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 bg-cover bg-center ring-2 ring-primary/50" data-alt="Profile picture of the user" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDRmuHKvqV5qp0LRsygUfDqEmPv3zAaRSPUOE0Z8O9zYFOVs13iTDib37AUIA79u8wpvIeCi0n0edoNgKR_bG_nakuWxQ1BFeh8nCUGiWZ7FxelTExXuh2bfw9-6NT402Fh8G396DqP8VSh5gr1wC55tXnkn0TkejMTDEXTcLpRC5iW-LRaNtSCEUTM0HiREMSM3I3j71pLK5MYhVrsUAMECnIRf8jYj7eE96LUYhgDWnf4kTuztWeIMgARZIWcIGDV7hsbNKJxgeM");'>
+</div>
+</div>
+<div class="flex flex-col justify-center">
+<h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Dashboard</h2>
+</div>
+</div>
+<button class="relative flex items-center justify-center overflow-hidden rounded-full size-10 bg-transparent text-white hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined" style="font-size: 24px;">notifications</span>
+<span class="absolute top-2.5 right-2.5 size-2 bg-primary rounded-full border border-background-dark"></span>
+</button>
+</header>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col gap-6 px-5 pb-24 overflow-y-auto scrollbar-hide">
+<!-- Stats: Summary Cards -->
+<section class="flex flex-col gap-4">
+<!-- Total Balance Card (Hero) -->
+<div class="relative overflow-hidden rounded-2xl bg-[#1c2e36] p-6 shadow-lg border border-white/5">
+<!-- Subtle background decoration -->
+<div class="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-primary/20 blur-3xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col gap-2">
+<p class="text-slate-400 text-sm font-medium leading-normal">Total Balance</p>
+<div class="flex items-baseline gap-2">
+<h2 class="text-3xl font-bold tracking-tight text-white">$12,450.00</h2>
+</div>
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1 rounded-full bg-primary/20 px-2 py-0.5 text-xs font-semibold text-primary">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>+5%</span>
+</div>
+<span class="text-xs text-slate-500">vs last month</span>
+</div>
+</div>
+</div>
+<!-- Income & Expense Row -->
+<div class="grid grid-cols-2 gap-4">
+<!-- Income Stats -->
+<div class="flex flex-col gap-3 rounded-2xl bg-[#1c2e36] p-5 shadow-lg border border-white/5">
+<div class="flex size-10 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500">
+<span class="material-symbols-outlined">arrow_downward</span>
+</div>
+<div>
+<p class="text-slate-400 text-xs font-medium uppercase tracking-wider leading-normal">Income</p>
+<p class="text-xl font-bold text-white mt-1 leading-tight">$4,200.00</p>
+<p class="text-[#0bda49] text-xs font-medium mt-1">+12%</p>
+</div>
+</div>
+<!-- Expense Stats -->
+<div class="flex flex-col gap-3 rounded-2xl bg-[#1c2e36] p-5 shadow-lg border border-white/5">
+<div class="flex size-10 items-center justify-center rounded-full bg-rose-500/10 text-rose-500">
+<span class="material-symbols-outlined">arrow_upward</span>
+</div>
+<div>
+<p class="text-slate-400 text-xs font-medium uppercase tracking-wider leading-normal">Expense</p>
+<p class="text-xl font-bold text-white mt-1 leading-tight">$1,850.00</p>
+<p class="text-[#fa5838] text-xs font-medium mt-1">-2%</p>
+</div>
+</div>
+</div>
+</section>
+<!-- HeadlineText & Charts: Cashflow Trend -->
+<section class="flex flex-col gap-4">
+<div class="flex items-center justify-between pt-2">
+<h2 class="text-white tracking-light text-[22px] font-bold leading-tight">Cashflow Trend</h2>
+</div>
+<div class="rounded-2xl bg-[#1c2e36] p-5 shadow-lg border border-white/5">
+<!-- Chips: Time Filters -->
+<div class="flex items-center justify-between bg-black/20 p-1 rounded-xl mb-6">
+<button class="flex-1 py-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors rounded-lg">1D</button>
+<button class="flex-1 py-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors rounded-lg">1W</button>
+<button class="flex-1 py-1.5 text-xs font-bold text-white bg-primary shadow-sm rounded-lg">1M</button>
+<button class="flex-1 py-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors rounded-lg">3M</button>
+<button class="flex-1 py-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors rounded-lg">1Y</button>
+</div>
+<!-- Chart Stats -->
+<div class="mb-6">
+<p class="text-slate-400 text-xs font-medium">Net Cashflow</p>
+<div class="flex items-end gap-3">
+<span class="text-2xl font-bold text-white">+$2,350</span>
+<span class="text-sm font-medium text-emerald-400 mb-1">+15%</span>
+</div>
+</div>
+<!-- Line Chart Visualization -->
+<div class="relative h-44 w-full">
+<svg class="h-full w-full overflow-visible" preserveaspectratio="none" viewbox="0 0 478 150">
+<defs>
+<lineargradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#10b77f" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#10b77f" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<!-- Grid lines -->
+<line stroke="#ffffff" stroke-dasharray="4 4" stroke-opacity="0.05" x1="0" x2="478" y1="0" y2="0"></line>
+<line stroke="#ffffff" stroke-dasharray="4 4" stroke-opacity="0.05" x1="0" x2="478" y1="75" y2="75"></line>
+<line stroke="#ffffff" stroke-dasharray="4 4" stroke-opacity="0.05" x1="0" x2="478" y1="150" y2="150"></line>
+<!-- Smooth Curve Path -->
+<path d="M0 109 C 18 109, 18 21, 36 21 C 54 21, 54 41, 72 41 C 90 41, 90 93, 108 93 C 127 93, 127 33, 145 33 C 163 33, 163 101, 181 101 C 199 101, 199 61, 217 61 C 236 61, 236 45, 254 45 C 272 45, 272 121, 290 121 C 308 121, 308 149, 326 149 C 344 149, 344 1, 363 1 C 381 1, 381 81, 399 81 C 417 81, 417 129, 435 129 C 453 129, 453 25, 472 25 V 150 H 0 V 109 Z" fill="url(#chartGradient)"></path>
+<path d="M0 109 C 18 109, 18 21, 36 21 C 54 21, 54 41, 72 41 C 90 41, 90 93, 108 93 C 127 93, 127 33, 145 33 C 163 33, 163 101, 181 101 C 199 101, 199 61, 217 61 C 236 61, 236 45, 254 45 C 272 45, 272 121, 290 121 C 308 121, 308 149, 326 149 C 344 149, 344 1, 363 1 C 381 1, 381 81, 399 81 C 417 81, 417 129, 435 129 C 453 129, 453 25, 472 25" fill="none" stroke="#10b77f" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
+<!-- Interactive Dot -->
+<circle cx="217" cy="61" fill="#10b77f" r="5" stroke="#ffffff" stroke-width="2"></circle>
+</svg>
+</div>
+</div>
+</section>
+<!-- Distribution Section: Donut Charts -->
+<section class="flex flex-col gap-4">
+<h2 class="text-white tracking-light text-[22px] font-bold leading-tight">Distribution</h2>
+<div class="grid grid-cols-2 gap-4">
+<!-- Income Donut -->
+<div class="flex flex-col items-center justify-center rounded-2xl bg-[#1c2e36] p-4 shadow-lg border border-white/5 relative">
+<h4 class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wide">Income</h4>
+<div class="relative size-24">
+<svg class="size-full -rotate-90" viewbox="0 0 36 36">
+<!-- Background Circle -->
+<path class="text-slate-700/30" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="4"></path>
+<!-- Value Circle -->
+<path class="text-emerald-500" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="75, 100" stroke-linecap="round" stroke-width="4"></path>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center flex-col">
+<span class="text-[10px] text-slate-400">Salary</span>
+<span class="text-xs font-bold text-white">75%</span>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap justify-center gap-2">
+<div class="flex items-center gap-1">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+<span class="text-[10px] text-slate-400">Salary</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="size-2 rounded-full bg-slate-600"></span>
+<span class="text-[10px] text-slate-400">Other</span>
+</div>
+</div>
+</div>
+<!-- Expense Donut -->
+<div class="flex flex-col items-center justify-center rounded-2xl bg-[#1c2e36] p-4 shadow-lg border border-white/5 relative">
+<h4 class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wide">Expense</h4>
+<div class="relative size-24">
+<svg class="size-full -rotate-90" viewbox="0 0 36 36">
+<!-- Background Circle -->
+<path class="text-slate-700/30" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="4"></path>
+<!-- Value Circle -->
+<path class="text-[#fa5838]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="60, 100" stroke-linecap="round" stroke-width="4"></path>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center flex-col">
+<span class="text-[10px] text-slate-400">Rent</span>
+<span class="text-xs font-bold text-white">60%</span>
+</div>
+</div>
+<div class="mt-3 flex flex-wrap justify-center gap-2">
+<div class="flex items-center gap-1">
+<span class="size-2 rounded-full bg-[#fa5838]"></span>
+<span class="text-[10px] text-slate-400">Rent</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="size-2 rounded-full bg-slate-600"></span>
+<span class="text-[10px] text-slate-400">Food</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation (Mobile Tab Bar) -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around bg-[#10221c]/95 backdrop-blur-lg border-t border-white/5 py-3 px-2 max-w-md mx-auto">
+<button class="flex flex-col items-center justify-center gap-1 text-primary w-14">
+<span class="material-symbols-outlined text-[24px]">grid_view</span>
+<span class="text-[10px] font-medium">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-slate-300 w-14 transition-colors">
+<span class="material-symbols-outlined text-[24px]">pie_chart</span>
+<span class="text-[10px] font-medium">Stats</span>
+</button>
+<button class="flex items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/40 -mt-8 size-14 border-4 border-background-dark transform transition-transform active:scale-95">
+<span class="material-symbols-outlined text-[28px]">add</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-slate-300 w-14 transition-colors">
+<span class="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+<span class="text-[10px] font-medium">Wallet</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 text-slate-500 hover:text-slate-300 w-14 transition-colors">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</button>
+</nav>
+</div>
+</body></html>

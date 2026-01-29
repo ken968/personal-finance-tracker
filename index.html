@@ -1,175 +1,193 @@
 <!DOCTYPE html>
-<html lang="id">
+<html class="dark" lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Personal Finance Tracker - Aplikasi pencatat keuangan pribadi untuk mengelola pemasukan dan pengeluaran Anda">
-    <meta name="keywords" content="keuangan, finance tracker, pencatat keuangan, budget, pemasukan, pengeluaran">
-    <title>Personal Finance Tracker - Kelola Keuangan Anda</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Personal Finance Tracker</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Tailwind Config -->
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#10b77f",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#10221c",
+                        "surface-dark": "#162e26",
+                        "accent-green": "#326755",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+
+    <style>
+        /* Custom scrollbar hiding */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #326755;
+            border-radius: 3px;
+        }
+
+        /* Date input styling */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.6;
+            cursor: pointer;
+        }
+
+        /* App section visibility */
+        .app-section {
+            display: none;
+        }
+
+        .app-section.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
 </head>
-<body>
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay hidden">
-        <div class="spinner"></div>
-        <p>Memuat data...</p>
+
+<body
+    class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display overflow-x-hidden antialiased selection:bg-primary selection:text-white">
+
+    <!-- App Loader -->
+    <div id="app-loader" class="fixed inset-0 z-[200] bg-background-dark flex items-center justify-center">
+        <div class="text-center">
+            <div class="size-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4">
+            </div>
+            <p class="text-white text-sm">Loading...</p>
+        </div>
     </div>
 
-    <!-- Main Container -->
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <h1>Personal Finance Tracker</h1>
-            <p class="subtitle">Darmawan Kenzo Ozora</p>
+    <!-- Error Container -->
+    <div id="error-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-[150] w-full max-w-md px-4 hidden"></div>
+
+    <!-- Main App Container -->
+    <div
+        class="relative flex h-full min-h-screen w-full flex-col shadow-2xl overflow-hidden bg-background-light dark:bg-background-dark">
+
+        <!-- Top App Bar -->
+        <header
+            class="flex items-center justify-between p-5 pt-8 bg-transparent sticky top-0 z-20 backdrop-blur-md border-b border-transparent dark:border-white/5">
+            <div class="flex items-center gap-3">
+                <div class="relative group cursor-pointer">
+                    <div
+                        class="size-10 rounded-full bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center ring-2 ring-primary/50">
+                        <span class="material-symbols-outlined text-white text-[20px]">account_balance_wallet</span>
+                    </div>
+                </div>
+                <div class="flex flex-col justify-center">
+                    <h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em]" id="header-title">
+                        Darmawan Ken</h2>
+                </div>
+            </div>
         </header>
 
-         <!-- Dashboard Summary Section -->
-        <section class="card dashboard-section">
-            <h2>Dashboard Keuangan</h2>
-            
-            <div class="summary-cards">
-                <div class="summary-card balance-card">
-                    <div class="summary-icon">💵</div>
-                    <div class="summary-content">
-                        <p class="summary-label">Saldo Akhir</p>
-                        <p class="summary-value" id="finalBalance">Rp 0</p>
-                    </div>
-                </div>
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="app-section active flex-1">
+            <!-- Content will be rendered by dashboard.js -->
+        </div>
 
-                <div class="summary-card income-card">
-                    <div class="summary-icon">📈</div>
-                    <div class="summary-content">
-                        <p class="summary-label">Total Pemasukan</p>
-                        <p class="summary-value income" id="totalIncome">Rp 0</p>
-                    </div>
-                </div>
+        <!-- Transaction History Section -->
+        <div id="history-section" class="app-section flex-1">
+            <!-- Content will be rendered by transaction-history.js -->
+        </div>
 
-                <div class="summary-card expense-card">
-                    <div class="summary-icon">📉</div>
-                    <div class="summary-content">
-                        <p class="summary-label">Total Pengeluaran</p>
-                        <p class="summary-value expense" id="totalExpense">Rp 0</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <!-- Manage Categories Section -->
+        <div id="categories-section" class="app-section flex-1">
+            <!-- Content will be rendered by manage-categories.js -->
+        </div>
 
-        <!-- Initial Balance Setup Section -->
-        <section class="card initial-balance-section">
-            <h2>Setup Saldo Awal</h2>
-            <p class="section-description">Masukkan total uang Anda saat ini (Cash + Bank + Dompet Digital)</p>
-            <form id="initialBalanceForm" class="form">
-                <div class="form-group">
-                    <label for="initialBalanceInput">Saldo Awal (Rp)</label>
-                    <input 
-                        type="text" 
-                        inputmode="numeric"
-                        id="initialBalanceInput" 
-                        placeholder="Contoh: 5.000.000" 
-                        required
-                    >
-                </div>
-                <button type="submit" class="btn btn-primary" id="saveInitialBalanceBtn">
-                    <span class="btn-text">Simpan Saldo Awal</span>
-                </button>
-            </form>
-            <div id="currentBalanceDisplay" class="current-balance hidden">
-                <p>Saldo Awal Tersimpan: <strong id="savedBalanceAmount">Rp 0</strong></p>
-            </div>
-        </section>
+        <!-- Settings Section -->
+        <div id="settings-section" class="app-section flex-1">
+            <!-- Content will be rendered by app.js -->
+        </div>
 
-        <!-- Transaction Input Section -->
-        <section class="card transaction-input-section">
-            <h2>Input Transaksi</h2>
-            <form id="transactionForm" class="form">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="transactionType">Tipe Transaksi</label>
-                        <select id="transactionType" required>
-                            <option value="">Pilih Tipe</option>
-                            <option value="income">Pemasukan</option>
-                            <option value="expense">Pengeluaran</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="transactionCategory">Kategori</label>
-                        <select id="transactionCategory" required disabled>
-                            <option value="">Pilih tipe terlebih dahulu</option>
-                        </select>
-                    </div>
-                </div>
+        <!-- Bottom Navigation (Mobile Tab Bar) -->
+        <nav
+            class="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around md:justify-center md:gap-20 bg-[#10221c]/95 backdrop-blur-lg border-t border-white/5 py-4 px-4 max-w-5xl mx-auto md:rounded-t-2xl md:border-x md:shadow-2xl">
+            <button data-nav="dashboard" class="flex flex-col items-center justify-center gap-1 text-primary w-14">
+                <span class="material-symbols-outlined text-[24px]">grid_view</span>
+                <span class="text-[10px] font-medium">Home</span>
+            </button>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="transactionAmount">Jumlah (Rp)</label>
-                        <input 
-                            type="text" 
-                            inputmode="numeric"
-                            id="transactionAmount" 
-                            placeholder="Contoh: 50.000" 
-                            required
-                        >
-                    </div>
-                    <div class="form-group">
-                        <label for="transactionDate">Tanggal</label>
-                        <input 
-                            type="date" 
-                            id="transactionDate" 
-                            required
-                        >
-                    </div>
-                </div>
+            <button data-nav="history"
+                class="flex flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary w-14 transition-colors">
+                <span class="material-symbols-outlined text-[24px]">history</span>
+                <span class="text-[10px] font-medium">History</span>
+            </button>
 
-                <div class="form-group">
-                    <label for="transactionDescription">Deskripsi</label>
-                    <input 
-                        type="text" 
-                        id="transactionDescription" 
-                        placeholder="Contoh: Gaji bulanan, Makan siang, dll." 
-                        maxlength="100"
-                        required
-                    >
-                </div>
+            <button id="fab-add-transaction"
+                class="flex items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/40 -mt-8 size-14 border-4 border-background-dark transform transition-transform active:scale-95 hover:bg-primary/90">
+                <span class="material-symbols-outlined text-[28px]">add</span>
+            </button>
 
-                <button type="submit" class="btn btn-primary" id="addTransactionBtn">
-                    <span class="btn-text">Tambah Transaksi</span>
-                </button>
-            </form>
-        </section>
+            <button data-nav="categories"
+                class="flex flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary w-14 transition-colors">
+                <span class="material-symbols-outlined text-[24px]">category</span>
+                <span class="text-[10px] font-medium">Categories</span>
+            </button>
 
-        <!-- Filter Section -->
-        <section class="card filter-section">
-            <h2>Filter Transaksi</h2>
-            <div class="filter-controls">
-                <label for="timeFilter">Tampilkan:</label>
-                <select id="timeFilter" class="filter-select">
-                    <option value="all">Semua Transaksi</option>
-                    <option value="today">Hari Ini</option>
-                    <option value="week">Minggu Ini</option>
-                    <option value="month">Bulan Ini</option>
-                </select>
-            </div>
-        </section>
-
-        <!-- Transaction List Section -->
-        <section class="card transaction-list-section">
-            <h2>Riwayat Transaksi</h2>
-            <div id="transactionList" class="transaction-list">
-                <div class="empty-state" id="emptyState">
-                    <p>📭 Belum ada transaksi</p>
-                    <p class="empty-state-subtitle">Mulai tambahkan transaksi pertama Anda!</p>
-                </div>
-            </div>
-        </section>
+            <button data-nav="settings"
+                class="flex flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary dark:hover:text-primary w-14 transition-colors">
+                <span class="material-symbols-outlined text-[24px]">settings</span>
+                <span class="text-[10px] font-medium">Settings</span>
+            </button>
+        </nav>
     </div>
 
-    <!-- Alert/Toast Notification -->
-    <div id="alertToast" class="alert-toast hidden">
-        <span id="alertMessage"></span>
-    </div>
-
-    <!-- Firebase SDK v9+ (Modular) -->
-    <script type="module" src="firebase-config.js"></script>
-    <script type="module" src="app.js"></script>
+    <!-- Load Main App (ES6 Module) -->
+    <script type="module" src="./app.js"></script>
 </body>
+
 </html>
