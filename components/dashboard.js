@@ -6,7 +6,8 @@ import {
   formatCurrency,
   generateLineChartData,
   generatePieChartData,
-  calculatePercentageChange
+  calculatePercentageChange,
+  getCategoryIcon
 } from '../utils/helpers.js';
 
 let currentPeriod = 'ALL';
@@ -129,7 +130,11 @@ export async function renderDashboard() {
                     <div class="flex items-center justify-between mb-6">
                         <div>
                             <h2 class="text-white text-xl font-bold">Cashflow Trend</h2>
-                            <p class="text-slate-400 text-sm mt-1">Net Cashflow: <span class="text-white font-bold">${stats.balance >= 0 ? '+' : ''}${formatCurrency(stats.balance)}</span></p>
+                            <h2 class="text-white text-xl font-bold">Cashflow Trend</h2>
+                            <div class="mt-1">
+                                <p class="text-slate-400 text-xs uppercase font-bold tracking-wider">Net Cashflow</p>
+                                <p class="text-white font-bold text-lg">${stats.balance >= 0 ? '+' : ''}${formatCurrency(stats.balance)}</p>
+                            </div>
                         </div>
                         <!-- Use the new compact time filters -->
                         <div class="flex items-center gap-1 bg-black/20 p-1 rounded-lg">
@@ -188,21 +193,40 @@ export async function renderDashboard() {
                         <button onclick="navigateToSection('history')" class="text-sm text-primary hover:text-white transition-colors font-medium">View All</button>
                     </div>
                     <div class="space-y-3">
-                        ${stats.transactions.slice(0, 5).map(t => {
+            ${stats.transactions.slice(0, 5).map(t => {
       const isIncome = t.type === 'income';
+      const isInvestment = t.type === 'investment';
+
+      let colorClass = 'text-rose-400';
+      let bgClass = 'bg-rose-500/10';
+      let iconClass = 'text-rose-400';
+      let operator = '-';
+
+      if (isIncome) {
+        colorClass = 'text-emerald-400';
+        bgClass = 'bg-emerald-500/10';
+        iconClass = 'text-emerald-400';
+        operator = '+';
+      } else if (isInvestment) {
+        colorClass = 'text-blue-400';
+        bgClass = 'bg-blue-500/10';
+        iconClass = 'text-blue-400';
+        operator = '-'; // Investment is an outflow
+      }
+
       return `
                             <div class="flex items-center justify-between p-3 rounded-xl bg-black/20 hover:bg-black/30 transition-colors border border-white/5">
                                 <div class="flex items-center gap-3">
-                                    <div class="size-10 rounded-full flex items-center justify-center ${isIncome ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">
-                                        <span class="material-symbols-outlined text-[20px]">${t.category === 'Salary' ? 'payments' : t.category === 'Food' ? 'restaurant' : 'category'}</span>
+                                    <div class="size-10 rounded-full flex items-center justify-center ${bgClass} ${iconClass}">
+                                        <span class="material-symbols-outlined text-[20px]">${getCategoryIcon(t.category)}</span>
                                     </div>
                                     <div>
                                         <p class="text-white text-sm font-semibold">${t.category}</p>
                                         <p class="text-slate-400 text-xs">${new Date(t.date?.toDate ? t.date.toDate() : t.date).toLocaleDateString()}</p>
                                     </div>
                                 </div>
-                                <span class="font-bold ${isIncome ? 'text-emerald-400' : 'text-rose-400'}">
-                                    ${isIncome ? '+' : '-'}${formatCurrency(t.amount)}
+                                <span class="font-bold ${colorClass}">
+                                    ${operator}${formatCurrency(t.amount)}
                                 </span>
                             </div>
                             `;

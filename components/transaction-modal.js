@@ -435,10 +435,7 @@ async function handleSaveNewCategory(e) {
     const type = typeInput.value;
 
     // Add the new category to Firestore
-    await addCategory({
-      name: newCategoryName,
-      type: type
-    });
+    await addCategory(newCategoryName, type);
 
     // Refresh categories and update dropdown
     const incomeCategories = await getCategories('income');
