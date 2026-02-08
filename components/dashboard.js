@@ -38,10 +38,10 @@ export async function renderDashboard() {
     container.innerHTML = `
       <main class="flex-1 px-5 pb-24 overflow-y-auto scrollbar-hide">
         <!-- Dashboard Grid Layout -->
-        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="max-w-[95%] mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8">
             
-            <!-- Column 1: Stats & Overview -->
-            <div class="flex flex-col gap-6 lg:col-span-1">
+            <!-- Column 1: Stats & Overview (Takes 2 columns on desktop) -->
+            <div class="flex flex-col gap-6 lg:col-span-2">
                 <!-- Total Balance Card (Hero) -->
                 <div class="relative overflow-hidden rounded-3xl bg-[#1c2e36] p-6 shadow-xl border border-white/5 group hover:border-primary/20 transition-all">
                   <div class="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/20 blur-3xl pointer-events-none group-hover:bg-primary/30 transition-all"></div>
@@ -60,27 +60,38 @@ export async function renderDashboard() {
                   </div>
                 </div>
                 
-                <!-- Income & Expense Cards -->
-                <div class="grid grid-cols-2 gap-4">
+                <!-- Income & Expense & Investment Cards (Full Width) -->
+                <div class="grid grid-cols-1 gap-4">
                   <!-- Income Stats -->
-                  <div class="flex flex-col gap-4 rounded-3xl bg-[#1c2e36] p-5 shadow-xl border border-white/5 hover:border-emerald-500/20 transition-all">
-                    <div class="flex size-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400">
+                  <div class="flex items-center gap-4 rounded-3xl bg-[#1c2e36] p-5 shadow-xl border border-white/5 hover:border-emerald-500/20 transition-all">
+                    <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400">
                       <span class="material-symbols-outlined text-[24px]">arrow_downward</span>
                     </div>
-                    <div>
+                    <div class="flex-1">
                       <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Total Income</p>
-                      <p class="text-lg font-bold text-white leading-tight">${formatCurrency(allStats.totalIncome)}</p>
+                      <p class="text-2xl font-bold text-white leading-tight">${formatCurrency(allStats.totalIncome)}</p>
                     </div>
                   </div>
                   
                   <!-- Expense Stats -->
-                  <div class="flex flex-col gap-4 rounded-3xl bg-[#1c2e36] p-5 shadow-xl border border-white/5 hover:border-rose-500/20 transition-all">
-                    <div class="flex size-12 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-400">
+                  <div class="flex items-center gap-4 rounded-3xl bg-[#1c2e36] p-5 shadow-xl border border-white/5 hover:border-rose-500/20 transition-all">
+                    <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-rose-500/10 text-rose-400">
                       <span class="material-symbols-outlined text-[24px]">arrow_upward</span>
                     </div>
-                    <div>
+                    <div class="flex-1">
                       <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Total Expense</p>
-                      <p class="text-lg font-bold text-white leading-tight">${formatCurrency(allStats.totalExpense)}</p>
+                      <p class="text-2xl font-bold text-white leading-tight">${formatCurrency(allStats.totalExpense)}</p>
+                    </div>
+                  </div>
+                  
+                  <!-- Investment Stats (NEW) -->
+                  <div class="flex items-center gap-4 rounded-3xl bg-[#1c2e36] p-5 shadow-xl border border-white/5 hover:border-blue-500/20 transition-all">
+                    <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-400">
+                      <span class="material-symbols-outlined text-[24px]">trending_up</span>
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Total Investment</p>
+                      <p class="text-2xl font-bold text-white leading-tight">${formatCurrency(allStats.totalInvestment || 0)}</p>
                     </div>
                   </div>
                 </div>
@@ -101,12 +112,18 @@ export async function renderDashboard() {
                              <canvas id="expenseChartMobile"></canvas>
                            </div>
                         </div>
+                        <div class="flex flex-col items-center justify-center rounded-3xl bg-[#1c2e36] p-4 shadow-xl border border-white/5">
+                           <h4 class="text-[10px] font-bold text-slate-400 mb-3 uppercase tracking-widest">Investment</h4>
+                           <div class="relative size-20">
+                             <canvas id="investmentChartMobile"></canvas>
+                           </div>
+                        </div>
                     </div>
                 </section>
             </div>
             
             <!-- Column 2 & 3: Main Chart -->
-            <div class="flex flex-col gap-6 lg:col-span-2">
+            <div class="flex flex-col gap-6 lg:col-span-3">
                 <!-- Cashflow Trend Chart -->
                 <div class="flex-1 rounded-3xl bg-[#1c2e36] p-6 shadow-xl border border-white/5 flex flex-col min-h-[400px]">
                     <div class="flex items-center justify-between mb-6">
@@ -131,7 +148,7 @@ export async function renderDashboard() {
                 </div>
 
                 <!-- Desktop Distribution (Hidden on Mobile) -->
-                <div class="hidden lg:grid grid-cols-2 gap-6">
+                <div class="hidden lg:grid grid-cols-3 gap-6">
                     <div class="rounded-3xl bg-[#1c2e36] p-5 shadow-xl border border-white/5 flex items-center gap-6">
                         <div class="relative size-32 shrink-0">
                             <canvas id="incomeChartDesktop"></canvas>
@@ -150,6 +167,16 @@ export async function renderDashboard() {
                             <h4 class="text-sm font-bold text-rose-400 uppercase tracking-wider mb-2">Expense</h4>
                             <div class="text-2xl font-bold text-white">${formatCurrency(stats.totalExpense)}</div>
                             <p class="text-xs text-slate-400 mt-1">Top Spending</p>
+                        </div>
+                    </div>
+                    <div class="rounded-3xl bg-[#1c2e36] p-5 shadow-xl border border-white/5 flex items-center gap-6">
+                        <div class="relative size-32 shrink-0">
+                            <canvas id="investmentChartDesktop"></canvas>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-blue-400 uppercase tracking-wider mb-2">Investment</h4>
+                            <div class="text-2xl font-bold text-white">${formatCurrency(stats.totalInvestment || 0)}</div>
+                            <p class="text-xs text-slate-400 mt-1">Portfolio</p>
                         </div>
                     </div>
                 </div>
@@ -338,6 +365,21 @@ function initializeCharts(stats) {
   const expenseCtxDesktop = document.getElementById('expenseChartDesktop');
   if (expenseCtxDesktop) {
     window.expenseChartDesktop = new Chart(expenseCtxDesktop, createDoughnutConfig(expenseData, 'rgba(239, 68, 68, 0.9)'));
+  }
+
+  // INVESTMENT CHARTS (Mobile & Desktop)
+  const investmentData = generatePieChartData(stats.categoryBreakdown, 'investment');
+
+  // Mobile Investment
+  const investmentCtxMobile = document.getElementById('investmentChartMobile');
+  if (investmentCtxMobile) {
+    let investmentChart = new Chart(investmentCtxMobile, createDoughnutConfig(investmentData, 'rgba(59, 130, 246, 0.9)'));
+  }
+
+  // Desktop Investment
+  const investmentCtxDesktop = document.getElementById('investmentChartDesktop');
+  if (investmentCtxDesktop) {
+    window.investmentChartDesktop = new Chart(investmentCtxDesktop, createDoughnutConfig(investmentData, 'rgba(59, 130, 246, 0.9)'));
   }
 }
 

@@ -64,8 +64,8 @@ export async function addCategory(name, type) {
             throw new Error('Name and type are required');
         }
 
-        if (type !== 'income' && type !== 'expense') {
-            throw new Error('Type must be "income" or "expense"');
+        if (type !== 'income' && type !== 'expense' && type !== 'investment') {
+            throw new Error('Type must be "income", "expense", or "investment"');
         }
 
         const categoryData = {
@@ -138,6 +138,15 @@ export async function initializeDefaultCategories() {
                 'Education'
             ];
 
+            // Default investment categories
+            const defaultInvestmentCategories = [
+                'BTC (Bitcoin)',
+                'Stocks',
+                'Gold',
+                'Bonds',
+                'Lainnya'
+            ];
+
             // Add income categories
             for (const name of defaultIncomeCategories) {
                 await addCategory(name, 'income');
@@ -146,6 +155,11 @@ export async function initializeDefaultCategories() {
             // Add expense categories
             for (const name of defaultExpenseCategories) {
                 await addCategory(name, 'expense');
+            }
+
+            // Add investment categories
+            for (const name of defaultInvestmentCategories) {
+                await addCategory(name, 'investment');
             }
 
             console.log('Default categories initialized successfully');

@@ -209,21 +209,24 @@ export function generateLineChartData(transactions, period) {
     // Sort transactions by date
     const sorted = [...transactions].sort((a, b) => a.date - b.date);
 
-    // Group by date and calculate income, expense, and balance
+    // Group by date and calculate income, expense, and investment
     const dateGroups = {};
     sorted.forEach(transaction => {
         const dateKey = formatDate(transaction.date, 'input');
         if (!dateGroups[dateKey]) {
             dateGroups[dateKey] = {
                 income: 0,
-                expense: 0
+                expense: 0,
+                investment: 0
             };
         }
 
         if (transaction.type === 'income') {
             dateGroups[dateKey].income += transaction.amount;
-        } else {
+        } else if (transaction.type === 'expense') {
             dateGroups[dateKey].expense += transaction.amount;
+        } else if (transaction.type === 'investment') {
+            dateGroups[dateKey].investment += transaction.amount;
         }
     });
 
@@ -231,17 +234,20 @@ export function generateLineChartData(transactions, period) {
     const dataPoints = [];
     let cumulativeIncome = 0;
     let cumulativeExpense = 0;
+    let cumulativeInvestment = 0;
     let cumulativeBalance = 0;
 
     Object.keys(dateGroups).sort().forEach(dateKey => {
         cumulativeIncome += dateGroups[dateKey].income;
         cumulativeExpense += dateGroups[dateKey].expense;
-        cumulativeBalance = cumulativeIncome - cumulativeExpense;
+        cumulativeInvestment += dateGroups[dateKey].investment;
+        cumulativeBalance = cumulativeIncome - cumulativeExpense - cumulativeInvestment;
 
         dataPoints.push({
             date: dateKey,
             income: cumulativeIncome,
             expense: cumulativeExpense,
+            investment: cumulativeInvestment,
             balance: cumulativeBalance
         });
     });
@@ -263,6 +269,15 @@ export function generateLineChartData(transactions, period) {
                 data: dataPoints.map(d => d.expense),
                 borderColor: '#ef4444',
                 backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                tension: 0.4,
+                fill: false,
+                borderWidth: 2
+            },
+            {
+                label: 'Investment',
+                data: dataPoints.map(d => d.investment),
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.05)',
                 tension: 0.4,
                 fill: false,
                 borderWidth: 2

@@ -2,6 +2,7 @@
 // TRANSACTION HISTORY COMPONENT
 // ==========================================
 import { getTransactions, deleteTransaction } from '../services/transaction-service.js';
+import { getCategories } from '../services/category-service.js';
 import {
   formatTransactionAmount,
   formatDate,
@@ -14,7 +15,9 @@ import { Timestamp } from '../services/firebase-service.js';
 
 let currentFilters = {
   startDate: null,
-  endDate: null
+  endDate: null,
+  type: 'all',
+  category: 'all'
 };
 
 /**
@@ -28,6 +31,12 @@ export async function renderTransactionHistory() {
     // Show loading state
     container.innerHTML = '<div class="flex items-center justify-center h-64"><div class="text-white">Loading...</div></div>';
 
+    // Fetch categories for filter dropdown
+    const incomeCategories = await getCategories('income');
+    const expenseCategories = await getCategories('expense');
+    const investmentCategories = await getCategories('investment');
+    const allCategories = [...incomeCategories, ...expenseCategories, ...investmentCategories].sort((a, b) => a.name.localeCompare(b.name));
+
     // Fetch transactions
     const filters = {};
     if (currentFilters.startDate) {
@@ -35,6 +44,12 @@ export async function renderTransactionHistory() {
     }
     if (currentFilters.endDate) {
       filters.endDate = Timestamp.fromDate(new Date(currentFilters.endDate));
+    }
+    if (currentFilters.type && currentFilters.type !== 'all') {
+      filters.type = currentFilters.type;
+    }
+    if (currentFilters.category && currentFilters.category !== 'all') {
+      filters.category = currentFilters.category;
     }
 
     const transactions = await getTransactions(filters);
@@ -50,8 +65,10 @@ export async function renderTransactionHistory() {
       <div class="flex flex-col h-full">
         <!-- Filter Section -->
         <div class="bg-white dark:bg-[#1c2e36] rounded-3xl p-6 shadow-lg border border-gray-100 dark:border-white/5 mb-6 flex-shrink-0">
-          <div class="flex flex-col lg:flex-row lg:items-end gap-4">
-            <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-4">
+            
+            <!-- Row 1: Date Filters -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="space-y-1.5">
                 <label class="text-xs text-slate-500 dark:text-slate-400 font-bold ml-1 uppercase tracking-wider">Start Date</label>
                 <div class="relative">
@@ -76,14 +93,38 @@ export async function renderTransactionHistory() {
               </div>
             </div>
 
-            <div class="flex gap-3 lg:w-auto">
-              <button id="reset-filter" class="flex-1 lg:flex-none h-12 px-6 rounded-xl border border-gray-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-gray-100 dark:hover:bg-white/5 transition-all">
-                Reset
-              </button>
-              <button id="apply-filter" class="flex-1 lg:flex-none h-12 px-8 bg-primary hover:bg-[#0e9f6e] text-[#11221c] font-bold text-sm tracking-wide rounded-xl shadow-lg shadow-primary/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-                <span class="material-symbols-outlined text-[18px]">filter_list</span>
-                Apply Filter
-              </button>
+            <!-- Row 2: Type & Category & Buttons -->
+            <div class="flex flex-col lg:flex-row gap-4">
+               <!-- Type Filter -->
+               <div class="flex-1 space-y-1.5">
+                  <label class="text-xs text-slate-500 dark:text-slate-400 font-bold ml-1 uppercase tracking-wider">Type</label>
+                  <select id="filter-type" class="form-select flex w-full rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-[#326755] bg-gray-50 dark:bg-[#132329] h-12 px-4 text-sm font-medium leading-normal shadow-sm transition-all">
+                    <option value="all" ${currentFilters.type === 'all' ? 'selected' : ''}>All Types</option>
+                    <option value="income" ${currentFilters.type === 'income' ? 'selected' : ''}>Income</option>
+                    <option value="expense" ${currentFilters.type === 'expense' ? 'selected' : ''}>Expense</option>
+                    <option value="investment" ${currentFilters.type === 'investment' ? 'selected' : ''}>Investment</option>
+                  </select>
+               </div>
+               
+               <!-- Category Filter -->
+               <div class="flex-1 space-y-1.5">
+                  <label class="text-xs text-slate-500 dark:text-slate-400 font-bold ml-1 uppercase tracking-wider">Category</label>
+                  <select id="filter-category" class="form-select flex w-full rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-[#326755] bg-gray-50 dark:bg-[#132329] h-12 px-4 text-sm font-medium leading-normal shadow-sm transition-all">
+                    <option value="all" ${currentFilters.category === 'all' ? 'selected' : ''}>All Categories</option>
+                    ${allCategories.map(cat => `<option value="${cat.name}" ${currentFilters.category === cat.name ? 'selected' : ''}>${cat.name}</option>`).join('')}
+                  </select>
+               </div>
+
+               <!-- Action Buttons -->
+               <div class="flex gap-3 lg:w-auto items-end">
+                  <button id="reset-filter" class="flex-1 lg:flex-none h-12 px-6 rounded-xl border border-gray-200 dark:border-white/10 text-slate-600 dark:text-slate-300 font-bold text-sm hover:bg-gray-100 dark:hover:bg-white/5 transition-all">
+                    Reset
+                  </button>
+                  <button id="apply-filter" class="flex-1 lg:flex-none h-12 px-8 bg-primary hover:bg-[#0e9f6e] text-[#11221c] font-bold text-sm tracking-wide rounded-xl shadow-lg shadow-primary/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">filter_list</span>
+                    Apply
+                  </button>
+               </div>
             </div>
           </div>
         </div>
@@ -142,7 +183,13 @@ function renderTransactionGroups(groups) {
 function renderTransactionItem(transaction) {
   const icon = getCategoryIcon(transaction.category);
   const color = getCategoryColor(transaction.category);
-  const amountColor = transaction.type === 'income' ? 'text-primary' : 'text-red-500';
+
+  let amountColor = 'text-red-500';
+  if (transaction.type === 'income') {
+    amountColor = 'text-primary';
+  } else if (transaction.type === 'investment') {
+    amountColor = 'text-blue-500';
+  }
 
   return `
     <div class="group relative flex items-center gap-4 p-3 rounded-xl bg-white dark:bg-surface-dark border border-gray-100 dark:border-accent-green/20 shadow-sm transition-all hover:border-primary/30">
@@ -204,9 +251,13 @@ function renderEmptyState() {
 async function handleApplyFilter() {
   const startDate = document.getElementById('start-date')?.value;
   const endDate = document.getElementById('end-date')?.value;
+  const type = document.getElementById('filter-type')?.value;
+  const category = document.getElementById('filter-category')?.value;
 
   currentFilters.startDate = startDate;
   currentFilters.endDate = endDate;
+  currentFilters.type = type || 'all';
+  currentFilters.category = category || 'all';
 
   await renderTransactionHistory();
 }
@@ -217,6 +268,8 @@ async function handleApplyFilter() {
 async function handleResetFilter() {
   currentFilters.startDate = null;
   currentFilters.endDate = null;
+  currentFilters.type = 'all';
+  currentFilters.category = 'all';
 
   await renderTransactionHistory();
 }

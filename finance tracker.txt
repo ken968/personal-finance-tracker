@@ -1,0 +1,77 @@
+finance tracker
+
+sekedar referensi:
+https://youtu.be/eow7GpWb7UI?si=wBrNANZyeHPg91k6
+https://personal-finance-tracker-f603e.web.app/ -> (webku sekarang)
+https://finance-app-8eae3.web.app/dashboard
+
+
+
+rencana upgrade fitur dan UI web, awalnya buat web ini simple karna cuma sbg pengingat pengeluaran.
+sekarang karna kebutuhan makin advance rencananya bakal update website segi fitur dan UI. 
+
+
+1. update fitur & UI
+- aku mau ada time frame chart yg isinya cash flow trend utk expense dan income dengan format waktu time frame chart 1 day 1 month 3 month 6 month 1 year. jadi, dalam time frame ada 2 chart yaitu income dan expense. Digambar itu aku ambil referensi dari treasury tapi cuma utk gambaran bukan utk ditiru plek ketiplek. dan juga di bagian atas ada bagian yg menunjukkan sedang plus atau minus berdasar time frame. missal hari ini plus bulan ini minus tergantung kita lagi pilih jangka Waktu berapa. 
+
+- aku mau tambah fitur kalo aku bisa lihat percentage berapa kategori income dan expense yg paling banyak. missal dari income paling banyak dari gaji sekitar 40% trus disusul uang ortu 27%, utk expense makanan 60% belanja 32% saeperti itu contohnya
+
+- tambah fitur edit history transaksi jadi kalo ada salah tinggal edit bukan di hapus
+
+- perluas Waktu di filter transaksi. aku mau pengaturan waktunya pakai kalender aja (time). bukan dipisah hari ini , minggu ini, bulan ini. jadi disamakan seperti pengaturan 'tanggal' di input transaksi. buat fitur ini satu page dengan time frame chart. 
+
+- utk link referensi itu jadikan sebatas referensi aja. g perlu tiru sama persis aku mau web ini dibagi ke beberapa page bukan 1. utk database tetap pakai yg sudah ada yaitu firebase g perlu ganti. 
+
+- aku mau coba utk bikin bagian ui pakai google stich
+
+2. tambahan 
+- tolong bantu gimana caranya pakai design ui dengan google stich dan tempat source code Utama masih pake antigravity. tolong buatkan promt utk antigravity dan google stich. gimana cara pakenya 
+
+
+google stitch
+
+[MODE: THINKING / 3 PRO]
+
+Buatkan Desain UI Website "Personal Finance Tracker" yang RESPONSIF (Single Page Application style).
+
+STRUKTUR LAYOUT:
+
+1. Navigasi: Sidebar di kiri (Desktop) yang otomatis berubah menjadi Bottom Navigation Bar (Mobile). Menu: Dashboard, Riwayat, Kelola Kategori.
+
+2. Dashboard Page: 
+
+   - Card Total Saldo, Total Pemasukan, dan Total Pengeluaran yang elegan.
+
+   - Section Chart: Slot untuk Line Chart (Cashflow Trend) dengan tombol filter waktu (1D, 1M, 3M, 6M, 1Y).
+
+   - Section Distribution: Dua slot Pie Chart untuk persentase kategori Pemasukan dan Pengeluaran.
+
+3. Riwayat Page:
+
+   - Filter menggunakan Date Range Picker (Start Date & End Date).
+
+   - Tabel transaksi yang bersih dengan tombol "Edit" (ikon pensil) dan "Hapus" (ikon sampah).
+
+4. Kelola Kategori Page:
+
+   - Form untuk menambah kategori baru (pilih tipe: Income/Expense).
+
+   - Daftar kategori yang sudah ada dalam bentuk kartu kecil/pills yang bisa dihapus.
+
+STYLE:
+
+- Gunakan tema warna Deep Navy (#0f172a) dan Emerald Green (#10b981).
+
+- Font modern (Inter atau Sans-serif).
+
+- Desain harus mobile-friendly (kartu menumpuk vertikal di HP, berjejer di Desktop).
+
+- Gunakan placeholder Chart.js agar saya bisa mengisinya dengan data nanti.
+
+- design simple elegan tidak lebay tidak pakai emoticon alay seperti banking app design
+
+5. tidak perlu pakai ui create account atau login karna ini web untuk saya pakai pribadi
+
+
+antigravity
+

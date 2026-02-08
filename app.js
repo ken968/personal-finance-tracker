@@ -217,6 +217,25 @@ async function renderSettings() {
           </div>
         </div>
         
+        <!-- Data Migration (NEW) -->
+        <div class="rounded-3xl bg-[#1c2e36] p-6 shadow-xl border border-white/5 h-full">
+          <div class="size-12 rounded-2xl bg-purple-500/20 flex items-center justify-center mb-4 text-purple-400">
+             <span class="material-symbols-outlined text-[24px]">sync</span>
+          </div>
+          <h2 class="text-xl font-bold mb-4 text-white">Data Migration</h2>
+          <p class="text-sm text-slate-400 mb-4 leading-relaxed">
+            Convert "Investasi" expenses to the new Investment type to properly track your investment spending.
+          </p>
+          <button 
+            id="migrate-data-btn"
+            class="w-full py-3 px-4 bg-purple-500 hover:bg-purple-600 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2 shadow-lg shadow-purple-500/25"
+          >
+            <span class="material-symbols-outlined text-[20px]">sync</span>
+            <span>Migrate Data</span>
+          </button>
+          <div id="migration-status" class="mt-3 text-xs text-slate-400 hidden"></div>
+        </div>
+        
         <!-- About -->
         <div class="rounded-3xl bg-[#1c2e36] p-6 shadow-xl border border-white/5 h-full">
           <div class="size-12 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-4 text-blue-400">
@@ -272,6 +291,62 @@ async function renderSettings() {
         if (balanceInput) {
             formatInputCurrency(balanceInput);
             balanceInput.addEventListener('input', (e) => formatInputCurrency(e.target));
+        }
+
+        // Setup migration button
+        const migrateBtn = document.getElementById('migrate-data-btn');
+        const migrationStatus = document.getElementById('migration-status');
+
+        if (migrateBtn && migrationStatus) {
+            migrateBtn.addEventListener('click', async () => {
+                const originalText = migrateBtn.innerHTML;
+
+                try {
+                    // Show loading
+                    migrateBtn.disabled = true;
+                    migrateBtn.innerHTML = '<span class="size-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> Migrating...';
+                    migrationStatus.classList.remove('hidden');
+                    migrationStatus.textContent = 'Checking for transactions to migrate...';
+
+                    // Import migration function
+                    const { migrateInvestasiToInvestment } = await import('./services/migrate-investasi.js');
+
+                    // Run migration
+                    const results = await migrateInvestasiToInvestment();
+
+                    // Show success
+                    migrateBtn.innerHTML = '<span class="material-symbols-outlined">check</span> Migration Complete!';
+                    migrateBtn.classList.remove('bg-purple-500', 'hover:bg-purple-600');
+                    migrateBtn.classList.add('bg-emerald-500');
+
+                    migrationStatus.textContent = `✓ Successfully migrated ${results.migratedCount} transactions from "Investasi" to "Investment" type.`;
+                    migrationStatus.classList.remove('text-slate-400');
+                    migrationStatus.classList.add('text-emerald-400');
+
+                    // Refresh the app after 2 seconds
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+
+                } catch (error) {
+                    console.error('Migration error:', error);
+                    migrateBtn.innerHTML = '<span class="material-symbols-outlined">error</span> Migration Failed';
+                    migrateBtn.classList.remove('bg-purple-500', 'hover:bg-purple-600');
+                    migrateBtn.classList.add('bg-rose-500');
+
+                    migrationStatus.textContent = `× Error: ${error.message}`;
+                    migrationStatus.classList.remove('text-slate-400');
+                    migrationStatus.classList.add('text-rose-400');
+
+                    setTimeout(() => {
+                        migrateBtn.innerHTML = originalText;
+                        migrateBtn.disabled = false;
+                        migrateBtn.classList.remove('bg-rose-500');
+                        migrateBtn.classList.add('bg-purple-500', 'hover:bg-purple-600');
+                        migrationStatus.classList.add('hidden');
+                    }, 5000);
+                }
+            });
         }
 
     } catch (error) {

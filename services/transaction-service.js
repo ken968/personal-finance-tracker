@@ -29,11 +29,17 @@ export async function getTransactions(filters = {}) {
         }));
 
         // Filter manual jika ada filter tanggal dari History
-        if (filters.startDate || filters.endDate) {
+        if (filters.startDate || filters.endDate || filters.type || filters.category) {
             transactions = transactions.filter(t => {
+                const date = t.date;
                 const start = filters.startDate ? filters.startDate.toDate() : new Date(0);
                 const end = filters.endDate ? filters.endDate.toDate() : new Date(2100, 0, 1);
-                return t.date >= start && t.date <= end;
+
+                const dateMatch = date >= start && date <= end;
+                const typeMatch = filters.type && filters.type !== 'all' ? t.type === filters.type : true;
+                const categoryMatch = filters.category && filters.category !== 'all' ? t.category === filters.category : true;
+
+                return dateMatch && typeMatch && categoryMatch;
             });
         }
 
@@ -53,19 +59,20 @@ export async function getBalance() {
         // 1. Ambil SEMUA transaksi tanpa filter query Firestore
         const snapshot = await getDocs(collection(db, TRANSACTIONS_COLLECTION));
         const allTransactions = snapshot.docs.map(doc => doc.data());
-        
+
         // 2. Ambil Saldo Awal
         const settings = await getSettings();
         const initialBalance = Number(settings?.initialBalance) || 0;
-        
+
         // 3. Hitung murni dari awal
         let total = initialBalance;
         allTransactions.forEach(t => {
             const amount = Number(t.amount) || 0;
             if (t.type === 'income') total += amount;
-            else total -= amount;
+            else if (t.type === 'expense') total -= amount;
+            else if (t.type === 'investment') total -= amount;
         });
-        
+
         return total;
     } catch (error) {
         console.error("Gagal hitung saldo global:", error);
@@ -79,7 +86,7 @@ export async function getBalance() {
 export async function getStats(timeFrame = 'all') {
     try {
         const allTransactions = await getTransactions();
-        
+
         let startDate = null;
         if (timeFrame && timeFrame.toUpperCase() !== 'ALL') {
             startDate = new Date();
@@ -94,11 +101,13 @@ export async function getStats(timeFrame = 'all') {
 
         let income = 0;
         let expense = 0;
+        let investment = 0;
         const categoryMap = {};
 
         filtered.forEach(t => {
             if (t.type === 'income') income += t.amount;
-            else expense += t.amount;
+            else if (t.type === 'expense') expense += t.amount;
+            else if (t.type === 'investment') investment += t.amount;
 
             const key = `${t.type}_${t.category}`;
             if (!categoryMap[key]) {
@@ -110,7 +119,8 @@ export async function getStats(timeFrame = 'all') {
         return {
             totalIncome: income,
             totalExpense: expense,
-            balance: income - expense,
+            totalInvestment: investment,
+            balance: income - expense - investment,
             transactions: filtered,
             categoryBreakdown: Object.values(categoryMap)
         };

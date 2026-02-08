@@ -19,6 +19,7 @@ export async function openTransactionModal(transaction = null) {
   // Fetch categories
   const incomeCategories = await getCategories('income');
   const expenseCategories = await getCategories('expense');
+  const investmentCategories = await getCategories('investment');
 
   // Get modal element
   let modal = document.getElementById('transaction-modal');
@@ -59,7 +60,7 @@ export async function openTransactionModal(transaction = null) {
           <!-- Transaction Type Toggle -->
           <div>
             <label class="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-2">Transaction Type</label>
-            <div class="grid grid-cols-2 gap-1 p-1 bg-gray-200 dark:bg-[#23483c] rounded-xl">
+            <div class="grid grid-cols-3 gap-1 p-1 bg-gray-200 dark:bg-[#23483c] rounded-xl">
               <label class="cursor-pointer">
                 <input 
                   class="peer sr-only transaction-type-input" 
@@ -84,6 +85,19 @@ export async function openTransactionModal(transaction = null) {
                 <div class="flex items-center justify-center h-10 rounded-lg text-sm font-medium text-gray-500 dark:text-[#92c9b7] peer-checked:bg-white dark:peer-checked:bg-background-dark peer-checked:text-rose-600 dark:peer-checked:text-rose-400 peer-checked:shadow-sm transition-all select-none">
                   <span class="material-symbols-outlined text-[18px] mr-1">arrow_upward</span>
                   Expense
+                </div>
+              </label>
+              <label class="cursor-pointer">
+                <input 
+                  class="peer sr-only transaction-type-input" 
+                  name="transaction_type" 
+                  type="radio" 
+                  value="investment"
+                  ${defaultType === 'investment' ? 'checked' : ''}
+                />
+                <div class="flex items-center justify-center h-10 rounded-lg text-sm font-medium text-gray-500 dark:text-[#92c9b7] peer-checked:bg-white dark:peer-checked:bg-background-dark peer-checked:text-blue-600 dark:peer-checked:text-blue-400 peer-checked:shadow-sm transition-all select-none">
+                  <span class="material-symbols-outlined text-[18px] mr-1">trending_up</span>
+                  Investment
                 </div>
               </label>
             </div>
@@ -122,6 +136,10 @@ export async function openTransactionModal(transaction = null) {
               </optgroup>
               <optgroup label="Expense" id="expense-categories">
                 ${expenseCategories.map(cat => `<option value="${cat.name}" ${defaultCategory === cat.name ? 'selected' : ''}>${cat.name}</option>`).join('')}
+                <option value="__ADD_NEW__" style="color: #10b77f; font-weight: 600;">+ Add New Category</option>
+              </optgroup>
+              <optgroup label="Investment" id="investment-categories">
+                ${investmentCategories.map(cat => `<option value="${cat.name}" ${defaultCategory === cat.name ? 'selected' : ''}>${cat.name}</option>`).join('')}
                 <option value="__ADD_NEW__" style="color: #10b77f; font-weight: 600;">+ Add New Category</option>
               </optgroup>
             </select>
@@ -331,26 +349,40 @@ function updateCategoryOptions() {
   const type = typeInput.value;
   const incomeGroup = document.getElementById('income-categories');
   const expenseGroup = document.getElementById('expense-categories');
+  const investmentGroup = document.getElementById('investment-categories');
 
   // Show/hide optgroups based on type
   if (type === 'income') {
     incomeGroup?.classList.remove('hidden');
     expenseGroup?.classList.add('hidden');
+    investmentGroup?.classList.add('hidden');
     // Select first income category if no selection
-    if (!categorySelect.value || categorySelect.querySelector(`option[value="${categorySelect.value}"]`)?.parentElement?.id === 'expense-categories') {
+    if (!categorySelect.value || categorySelect.querySelector(`option[value="${categorySelect.value}"]`)?.parentElement?.id !== 'income-categories') {
       const firstIncome = incomeGroup?.querySelector('option');
       if (firstIncome) {
         categorySelect.value = firstIncome.value;
       }
     }
-  } else {
+  } else if (type === 'expense') {
     incomeGroup?.classList.add('hidden');
     expenseGroup?.classList.remove('hidden');
+    investmentGroup?.classList.add('hidden');
     // Select first expense category if no selection
-    if (!categorySelect.value || categorySelect.querySelector(`option[value="${categorySelect.value}"]`)?.parentElement?.id === 'income-categories') {
+    if (!categorySelect.value || categorySelect.querySelector(`option[value="${categorySelect.value}"]`)?.parentElement?.id !== 'expense-categories') {
       const firstExpense = expenseGroup?.querySelector('option');
       if (firstExpense) {
         categorySelect.value = firstExpense.value;
+      }
+    }
+  } else if (type === 'investment') {
+    incomeGroup?.classList.add('hidden');
+    expenseGroup?.classList.add('hidden');
+    investmentGroup?.classList.remove('hidden');
+    // Select first investment category if no selection
+    if (!categorySelect.value || categorySelect.querySelector(`option[value="${categorySelect.value}"]`)?.parentElement?.id !== 'investment-categories') {
+      const firstInvestment = investmentGroup?.querySelector('option');
+      if (firstInvestment) {
+        categorySelect.value = firstInvestment.value;
       }
     }
   }
@@ -411,12 +443,14 @@ async function handleSaveNewCategory(e) {
     // Refresh categories and update dropdown
     const incomeCategories = await getCategories('income');
     const expenseCategories = await getCategories('expense');
+    const investmentCategories = await getCategories('investment');
 
     const categorySelect = document.getElementById('transaction-category');
     const incomeGroup = document.getElementById('income-categories');
     const expenseGroup = document.getElementById('expense-categories');
+    const investmentGroup = document.getElementById('investment-categories');
 
-    if (incomeGroup && expenseGroup && categorySelect) {
+    if (incomeGroup && expenseGroup && investmentGroup && categorySelect) {
       // Update income categories
       incomeGroup.innerHTML = incomeCategories.map(cat =>
         `<option value="${cat.name}">${cat.name}</option>`
@@ -424,6 +458,11 @@ async function handleSaveNewCategory(e) {
 
       // Update expense categories
       expenseGroup.innerHTML = expenseCategories.map(cat =>
+        `<option value="${cat.name}">${cat.name}</option>`
+      ).join('') + '<option value="__ADD_NEW__" style="color: #10b77f; font-weight: 600;">+ Add New Category</option>';
+
+      // Update investment categories
+      investmentGroup.innerHTML = investmentCategories.map(cat =>
         `<option value="${cat.name}">${cat.name}</option>`
       ).join('') + '<option value="__ADD_NEW__" style="color: #10b77f; font-weight: 600;">+ Add New Category</option>';
 
