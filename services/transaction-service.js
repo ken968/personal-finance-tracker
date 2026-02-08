@@ -37,7 +37,11 @@ export async function getTransactions(filters = {}) {
 
                 const dateMatch = date >= start && date <= end;
                 const typeMatch = filters.type && filters.type !== 'all' ? t.type === filters.type : true;
-                const categoryMatch = filters.category && filters.category !== 'all' ? t.category === filters.category : true;
+
+                // Category filter with case-insensitive and trimmed comparison
+                const categoryMatch = filters.category && filters.category !== 'all'
+                    ? t.category?.trim().toLowerCase() === filters.category.trim().toLowerCase()
+                    : true;
 
                 return dateMatch && typeMatch && categoryMatch;
             });

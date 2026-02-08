@@ -76,7 +76,8 @@ export async function renderTransactionHistory() {
                     id="start-date"
                     class="form-input flex w-full rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-[#326755] bg-gray-50 dark:bg-[#132329] h-12 px-4 text-sm font-medium leading-normal shadow-sm transition-all"
                     type="date"
-                    value="${currentFilters.startDate || formatDate(firstDayOfMonth, 'input')}"
+                    value="${currentFilters.startDate || ''}"
+                    placeholder="All time"
                   />
                 </div>
               </div>
@@ -87,7 +88,8 @@ export async function renderTransactionHistory() {
                     id="end-date"
                     class="form-input flex w-full rounded-xl text-slate-900 dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-gray-200 dark:border-[#326755] bg-gray-50 dark:bg-[#132329] h-12 px-4 text-sm font-medium leading-normal shadow-sm transition-all"
                     type="date"
-                    value="${currentFilters.endDate || formatDate(today, 'input')}"
+                    value="${currentFilters.endDate || ''}"
+                    placeholder="All time"
                   />
                 </div>
               </div>
