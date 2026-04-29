@@ -214,6 +214,24 @@ async function renderSettings() {
         </div>
         
         
+        <!-- Data Export -->
+        <div class="rounded-3xl bg-[#1c2e36] p-6 shadow-xl border border-white/5 h-full">
+          <div class="size-12 rounded-2xl bg-cyan-500/20 flex items-center justify-center mb-4 text-cyan-400">
+             <span class="material-symbols-outlined text-[24px]">download</span>
+          </div>
+          <h2 class="text-xl font-bold mb-4 text-white">Export Data</h2>
+          <p class="text-sm text-slate-400 mb-4 leading-relaxed">
+            Download all your transaction data as a CSV file for backup, data analysis, or deep learning.
+          </p>
+          <button 
+            id="export-csv-btn"
+            class="w-full py-3 px-4 bg-cyan-500 hover:bg-cyan-600 text-white rounded-xl font-medium transition-colors flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/25"
+          >
+            <span class="material-symbols-outlined text-[20px]">file_download</span>
+            <span>Export to CSV</span>
+          </button>
+        </div>
+        
         <div class="rounded-3xl bg-[#1c2e36] p-6 shadow-xl border border-white/5 h-full">
           <div class="size-12 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-4 text-blue-400">
              <span class="material-symbols-outlined text-[24px]">code</span>
@@ -268,6 +286,90 @@ async function renderSettings() {
         if (balanceInput) {
             formatInputCurrency(balanceInput);
             balanceInput.addEventListener('input', (e) => formatInputCurrency(e.target));
+        }
+
+        // Setup Export CSV button
+        const exportBtn = document.getElementById('export-csv-btn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', async () => {
+                const originalText = exportBtn.innerHTML;
+                try {
+                    exportBtn.disabled = true;
+                    exportBtn.innerHTML = '<span class="size-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span> Exporting...';
+                    
+                    const { getTransactions } = await import('./services/transaction-service.js');
+                    const allTransactions = await getTransactions();
+                    
+                    if (allTransactions.length === 0) {
+                        alert("No transactions to export.");
+                        exportBtn.innerHTML = originalText;
+                        exportBtn.disabled = false;
+                        return;
+                    }
+
+                    // Prepare CSV content
+                    const headers = ['Date', 'Type', 'Category', 'Amount', 'Description', 'Timestamp'];
+                    const rows = [headers.join(',')];
+                    
+                    allTransactions.forEach(t => {
+                        // format date as YYYY-MM-DD
+                        const dateStr = t.date.toISOString().split('T')[0];
+                        // format description: escape quotes and wrap in quotes if there are commas
+                        let desc = t.description || '';
+                        desc = desc.replace(/"/g, '""');
+                        if (desc.includes(',') || desc.includes('"') || desc.includes('\n')) {
+                            desc = `"${desc}"`;
+                        }
+                        const timestamp = Math.floor(t.date.getTime() / 1000);
+                        
+                        const rowData = [
+                            dateStr,
+                            t.type,
+                            t.category,
+                            t.amount,
+                            desc,
+                            timestamp
+                        ];
+                        rows.push(rowData.join(','));
+                    });
+                    
+                    const csvContent = rows.join('\\n');
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    const link = document.createElement('a');
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', \`finance_data_\${new Date().toISOString().split('T')[0]}.csv\`);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // Show success
+                    exportBtn.innerHTML = '<span class="material-symbols-outlined">check</span> Downloaded!';
+                    exportBtn.classList.remove('bg-cyan-500', 'hover:bg-cyan-600');
+                    exportBtn.classList.add('bg-emerald-500');
+                    
+                    setTimeout(() => {
+                        exportBtn.innerHTML = originalText;
+                        exportBtn.disabled = false;
+                        exportBtn.classList.remove('bg-emerald-500');
+                        exportBtn.classList.add('bg-cyan-500', 'hover:bg-cyan-600');
+                    }, 2000);
+                    
+                } catch (error) {
+                    console.error("Export error:", error);
+                    exportBtn.innerHTML = '<span class="material-symbols-outlined">error</span> Error';
+                    exportBtn.classList.remove('bg-cyan-500', 'hover:bg-cyan-600');
+                    exportBtn.classList.add('bg-rose-500');
+                    
+                    setTimeout(() => {
+                        exportBtn.innerHTML = originalText;
+                        exportBtn.disabled = false;
+                        exportBtn.classList.remove('bg-rose-500');
+                        exportBtn.classList.add('bg-cyan-500', 'hover:bg-cyan-600');
+                    }, 2000);
+                }
+            });
         }
 
     } catch (error) {
