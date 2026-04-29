@@ -333,13 +333,13 @@ async function renderSettings() {
                         rows.push(rowData.join(','));
                     });
                     
-                    const csvContent = rows.join('\\n');
+                    const csvContent = rows.join('\n');
                     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                     const url = URL.createObjectURL(blob);
                     
                     const link = document.createElement('a');
                     link.setAttribute('href', url);
-                    link.setAttribute('download', \`finance_data_\${new Date().toISOString().split('T')[0]}.csv\`);
+                    link.setAttribute('download', `finance_data_${new Date().toISOString().split('T')[0]}.csv`);
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
