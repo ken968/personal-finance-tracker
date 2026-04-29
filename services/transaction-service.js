@@ -99,6 +99,7 @@ export async function getStats(timeFrame = 'all') {
             else if (period === '1W') startDate.setDate(startDate.getDate() - 7);
             else if (period === '1M') startDate.setMonth(startDate.getMonth() - 1);
             else if (period === '3M') startDate.setMonth(startDate.getMonth() - 3);
+            else if (period === '6M') startDate.setMonth(startDate.getMonth() - 6);
             else if (period === '1Y') startDate.setFullYear(startDate.getFullYear() - 1);
         }
 

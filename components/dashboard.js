@@ -134,7 +134,7 @@ export async function renderDashboard() {
                         </div>
                         <!-- Use the new compact time filters -->
                         <div class="flex items-center gap-1 bg-black/20 p-1 rounded-lg">
-                           ${['1D', '1W', '1M', '3M', '1Y', 'ALL'].map(period => {
+                           ${['1D', '1W', '1M', '3M', '6M', '1Y', 'ALL'].map(period => {
       const isActive = period === currentPeriod;
       const activeClass = 'w-8 h-8 flex items-center justify-center text-[10px] font-bold text-white bg-primary shadow-sm rounded-md';
       const inactiveClass = 'w-8 h-8 flex items-center justify-center text-[10px] font-medium text-slate-400 hover:text-white hover:bg-white/5 transition-all rounded-md cursor-pointer';
