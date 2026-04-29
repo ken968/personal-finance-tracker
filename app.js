@@ -17,8 +17,6 @@ let currentSection = 'dashboard';
  */
 async function initApp() {
     try {
-        console.log('Initializing Personal Finance Tracker...');
-
         // Show loading state
         showLoading();
 
@@ -33,8 +31,6 @@ async function initApp() {
 
         // Hide loading state
         hideLoading();
-
-        console.log('Application initialized successfully!');
     } catch (error) {
         console.error('Error initializing application:', error);
         hideLoading();

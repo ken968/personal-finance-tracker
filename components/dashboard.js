@@ -26,9 +26,6 @@ export async function renderDashboard() {
     // Show loading state
     container.innerHTML = '<div class="flex items-center justify-center h-64"><div class="text-white">Loading...</div></div>';
 
-    console.log("DEBUG: renderDashboard executing. Current Period:", currentPeriod);
-    console.log("DEBUG: Fetching Global Balance...");
-
     // 1. GLOBAL STATE (All Time)
     const allStats = await getStats('ALL');
     const totalBalance = await getBalance(); // All Time + Initial Balance
