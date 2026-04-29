@@ -22,8 +22,8 @@ async function initApp() {
         // Show loading state
         showLoading();
 
-        // Initialize default categories if needed
-        await initializeDefaultCategories();
+        // Initialize default categories if needed (Disabled to prevent categories from adding themselves)
+        // await initializeDefaultCategories();
 
         // Set up navigation
         setupNavigation();

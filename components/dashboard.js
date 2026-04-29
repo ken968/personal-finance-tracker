@@ -130,7 +130,6 @@ export async function renderDashboard() {
                     <div class="flex items-center justify-between mb-6">
                         <div>
                             <h2 class="text-white text-xl font-bold">Cashflow Trend</h2>
-                            <h2 class="text-white text-xl font-bold">Cashflow Trend</h2>
                             <div class="mt-1">
                                 <p class="text-slate-400 text-xs uppercase font-bold tracking-wider">Net Cashflow</p>
                                 <p class="text-white font-bold text-lg">${stats.balance >= 0 ? '+' : ''}${formatCurrency(stats.balance)}</p>
